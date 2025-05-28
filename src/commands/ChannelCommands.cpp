@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 11:24:59 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 12:46:01 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,58 +65,58 @@ void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
 }
 
 //Handle Topic
-// void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
-//     User* user = _server->getUser(fd);
-//     if (args.size() < 2) {
-//         user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "TOPIC");
-//         return;
-//     }
+void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
+    User* user = _server.getUserByFd(fd);
+    if (args.size() < 2) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "TOPIC");
+        return;
+    }
 
-//     const std::string& chanName = args[1];
-//     Channel* channel = _server->getChannel(chanName);
+    const std::string& chanName = args[1];
+    Channel* channel = _server.getChannelByName(chanName);
 
-//     if (!channel) {
-//         user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *user, chanName);
-//         return;
-//     }
+    if (!channel) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *user, chanName);
+        return;
+    }
 
-//     // Check if user is in the channel
-//     if (!channel->isMember(user)) {
-//         user->getSendBuffer() += ReplyBuilder::build(ERR_NOTONCHANNEL, *user, chanName);
-//         return;
-//     }
+    // Check if user is in the channel
+    if (!channel->isMember(user)) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NOTONCHANNEL, *user, chanName);
+        return;
+    }
 
-//     if (args.size() == 2) {
-//         // Query topic
-//         if (channel->hasTopic()) {
-//             user->getSendBuffer() += ReplyBuilder::build(RPL_TOPIC, *user, chanName, channel->getTopic());
-//         } else {
-//             user->getSendBuffer() += ReplyBuilder::build(RPL_NOTOPIC, *user, chanName);
-//         }
-//         return;
-//     }
+    if (args.size() == 2) {
+        // Query topic
+        if (channel->hasTopic()) {
+            user->getSendBuffer() += ReplyBuilder::build(RPL_TOPIC, *user, chanName, channel->getTopic());
+        } else {
+            user->getSendBuffer() += ReplyBuilder::build(RPL_NOTOPIC, *user, chanName);
+        }
+        return;
+    }
 
-//     // Topic modification
-//     std::string topic = args[2];
-//     for (size_t i = 3; i < args.size(); ++i)
-//         topic += " " + args[i];
+    // Topic modification
+    std::string topic = args[2];
+    for (size_t i = 3; i < args.size(); ++i)
+        topic += " " + args[i];
 
-//     // Remove leading colon (if present)
-//     if (!topic.empty() && topic[0] == ':')
-//         topic = topic.substr(1);
+    // Remove leading colon (if present)
+    if (!topic.empty() && topic[0] == ':')
+        topic = topic.substr(1);
 
-//     // If +t mode, only ops can change topic
-//     if (channel->isTopicLocked() && !channel->isOperator(user)) {
-//         user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, chanName);
-//         return;
-//     }
+    // If +t mode, only ops can change topic
+    if (channel->isTopicLocked() && !channel->isOperator(user)) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, chanName);
+        return;
+    }
 
-//     channel->setTopic(topic);
+    channel->setTopic(topic);
 
-//     // Broadcast new topic to all members
-//     std::string msg = ":" + user->getPrefix() + " TOPIC " + chanName + " :" + topic + "\r\n";
-//     channel->broadcast(msg);
-// }
+    // Broadcast new topic to all members
+    std::string msg = ":" + user->getPrefix() + " TOPIC " + chanName + " :" + topic + "\r\n";
+    channel->broadcast(msg);
+}
 
 //Handle Mode
 void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {

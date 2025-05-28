@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 11:39:52 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 12:39:56 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ private:
     void handleJoin(int fd, const std::vector<std::string>& args);
     void handlePart(int fd, const std::vector<std::string>& args);
     void handleMode(int fd, const std::vector<std::string>& args);
-    //void handleTopic(int fd, const std::vector<std::string>& args);
+    void handleTopic(int fd, const std::vector<std::string>& args);
     // void handleInvite(int fd, const std::vector<std::string>& args);
     void handleKick(int fd, const std::vector<std::string>& args);
     // void handlePrivmsg(int fd, const std::vector<std::string>& args);
