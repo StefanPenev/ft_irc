@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 20:01:01 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 11:24:59 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,55 @@
 #include "ReplyBuilder.hpp"
 #include "ReplyCode.hpp"
 #include "Channel.hpp"
+#include "Server.hpp"
 #include <sstream>
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
+
+//Handle Kick
+void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
+    User* sender = _users[fd];
+
+    if (args.size() < 2) {
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *sender, "KICK");
+        return;
+    }
+
+    std::string chanName = args[0];
+    std::string targetNick = args[1];
+    std::string reason = (args.size() > 2) ? args[2] : sender->getNickname();
+
+    Channel* channel = _server.getChannelByName(chanName);
+    if (!channel) {
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *sender, chanName);
+        return;
+    }
+
+    if (!channel->isMember(sender)) {
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_NOTONCHANNEL, *sender, chanName);
+        return;
+    }
+
+    if (!channel->isOperator(sender)) {
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *sender, chanName);
+        return;
+    }
+
+    User* target = _server.getUserByNick(targetNick);
+    if (!target || !channel->isMember(target)) {
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_USERNOTINCHANNEL, *sender, targetNick + " " + chanName);
+        return;
+    }
+
+    // Broadcast KICK message to all channel users
+    std::string kickMsg = ":" + sender->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
+    channel->broadcast(kickMsg);
+
+    // Actually remove the user from the channel
+    channel->removeUser(target);
+    target->leaveChannel(chanName);
+}
 
 //Handle Topic
 // void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {

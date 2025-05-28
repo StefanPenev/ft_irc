@@ -6,11 +6,12 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:54:43 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/26 09:00:17 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 10:34:20 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "ReplyBuilder.hpp"
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
@@ -36,6 +37,7 @@ int	main(int argc, char const **argv)
 		}
 	}
 	port = atoi(argv[1]);
+	ReplyBuilder::init("ircserv");
 	Server serv(port, argv[2]);
 	serv.run();
 	return (0);

@@ -6,20 +6,21 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:25 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 20:01:24 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 11:26:55 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandHandler.hpp"
 #include "ReplyBuilder.hpp"
 #include "ReplyCode.hpp"
+#include "Server.hpp"
 #include "User.hpp"
 #include <sstream>
 #include <cctype>
 #include <iostream>
 
-CommandHandler::CommandHandler(const std::string& serverPassword, std::map<int, User*>& users)
-: _serverPassword(serverPassword), _users(users) {
+CommandHandler::CommandHandler(Server& server, const std::string& serverPassword, std::map<int, User*>& users)
+: _serverPassword(serverPassword), _server(server), _users(users) {
     _handlers["PASS"] = &CommandHandler::handlePass;
     _handlers["NICK"] = &CommandHandler::handleNick;
     _handlers["USER"] = &CommandHandler::handleUser;
@@ -28,7 +29,7 @@ CommandHandler::CommandHandler(const std::string& serverPassword, std::map<int, 
     _handlers["MODE"] = &CommandHandler::handleMode;
     //_handlers["TOPIC"] = &CommandHandler::handleTopic;
     // _handlers["INVITE"] = &CommandHandler::handleInvite;
-    // _handlers["KICK"] = &CommandHandler::handleKick;
+    _handlers["KICK"] = &CommandHandler::handleKick;
     // _handlers["PRIVMSG"] = &CommandHandler::handlePrivmsg;
 }
 
@@ -48,7 +49,8 @@ void CommandHandler::handleCommand(int fd, const std::string& line) {
     if (it != _handlers.end()) {
         (this->*(it->second))(fd, args);
     } else {
-        std::cout << "Unknown command: " << cmd << std::endl;
+        User* user = _users[fd];
+        user->getSendBuffer() += ReplyBuilder::build(ERR_UNKNOWNCOMMAND, *user, cmd);
     }
 }
 

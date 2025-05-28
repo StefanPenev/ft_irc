@@ -6,12 +6,15 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 20:01:10 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 11:39:52 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef COMMAND_HANDLER
 # define COMMAND_HANDLER
+
+//Forward declaration - it avaids circular dependencies
+class Server;
 
 #include "User.hpp"
 #include "Channel.hpp"
@@ -22,7 +25,7 @@
 
 class CommandHandler {
 public:
-    CommandHandler(const std::string& serverPassword, std::map<int, User*>& users);
+    CommandHandler(Server& server, const std::string& serverPassword, std::map<int, User*>& users);
     void handleCommand(int clientFd, const std::string& line);
     User* findUserByNick(const std::string& nick);
 
@@ -30,6 +33,7 @@ private:
     typedef void (CommandHandler::*HandlerFn)(int, const std::vector<std::string>&);
     std::map<std::string, HandlerFn> _handlers;
     std::string _serverPassword;
+    Server& _server;
     std::map<int, User*>& _users;    
     std::map<std::string, Channel*> _channels;
     
@@ -45,7 +49,7 @@ private:
     void handleMode(int fd, const std::vector<std::string>& args);
     //void handleTopic(int fd, const std::vector<std::string>& args);
     // void handleInvite(int fd, const std::vector<std::string>& args);
-    // void handleKick(int fd, const std::vector<std::string>& args);
+    void handleKick(int fd, const std::vector<std::string>& args);
     // void handlePrivmsg(int fd, const std::vector<std::string>& args);
 };
 

@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:28:46 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/26 08:59:50 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 10:56:11 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 # define SERVER_HPP
 
 # include <string>
+
+//new
+# include <map>
+# include "User.hpp"
+# include "Channel.hpp"
+# include "CommandHandler.hpp"
+//////
 
 class Server
 {
@@ -29,11 +36,26 @@ class Server
 	void bindSocket(int sockfd, struct addrinfo *res);
 	void startListening(int sockfd);
 
+	//new
+	std::map<int, User*> _users;
+    std::map<std::string, Channel*> _channels;
+	CommandHandler* _commandHandler;
+	/////
+	
   public:
 	Server();
 	Server(int port, const std::string &password);
 	~Server();
 	void run();
+
+	//new
+	User* getUserByFd(int fd);
+    Channel* getChannelByName(const std::string& name);
+	void flushSendBuffer(int fd);
+    void addUser(int fd, User* user);
+    void addChannel(const std::string& name, Channel* channel);
+	User* getUserByNick(const std::string& nick);
+	/////
 };
 
 #endif

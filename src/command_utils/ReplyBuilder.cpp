@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:55:01 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 19:34:48 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 11:15:55 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,10 @@ void ReplyBuilder::init(const std::string& serverName) {
     _templates[ERR_BADCHANNELKEY]    = ":<server> 475 <nick> <arg> :Cannot join channel (+k)";
     _templates[ERR_CHANNELISFULL]    = ":<server> 471 <nick> <arg> :Cannot join channel (+l)";
     _templates[ERR_USERNOTINCHANNEL] = ":<server> 441 <nick> <arg> :They aren't on that channel";
-    _templates[ERR_NOSUCHCHANNEL] = ":<server> 403 <nick> <arg> :No such channel";
+    _templates[ERR_NOSUCHCHANNEL]    = ":<server> 403 <nick> <arg> :No such channel";
     _templates[RPL_NOTOPIC]          = ":<server> 331 <nick> <arg> :No topic is set";
     _templates[RPL_TOPIC]            = ":<server> 332 <nick> <arg> :<msg>";
+    _templates[ERR_UNKNOWNCOMMAND]   = ":<server> 421 <nick> <arg> :Unknown command";
 }
 
 std::string ReplyBuilder::build(int code, const User& user, const std::string& arg, const std::string& msg) {

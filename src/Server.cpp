@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/26 08:59:30 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 11:54:36 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+//new
+#include "User.hpp"
+#include "Channel.hpp"
+/////
 
 struct addrinfo *Server::resolveAddress(const std::string &portStr)
 {
@@ -138,55 +143,111 @@ int Server::setupSocket()
 
 void Server::run()
 {
-	struct sockaddr	addr;
-	socklen_t		addrlen;
-	int				clientid;
-	int				bytesRead;
+	//new
+	struct sockaddr_storage addr;
+	socklen_t addrlen = sizeof(addr);
+	int clientid;
+	int bytesRead;
 
-	//std::string buf(1024, '\0');
-	addrlen = sizeof(addr);
-	std::cout << "Server is running and listening on port " << _port << "\n";
-	clientid = accept(this->_serverSocket, &addr, &addrlen);
-	if (clientid == -1)
-	{
-		perror("accept");
-		return ;
-	}
-	//   int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-	// sockfd is the listening socket descriptor. Simple enough.
-	// --------------
-	// addr will usually be a pointer to a local sockaddr structure.
-	// This is where information about incoming connections goes (you can use it to determine
-	// which host is calling you and from which port).
-	// --------------
-	// addrlen is a local integer variable that must contain the size of the
-	// struct sockaddr_storage before its address is passed to accept(). accept()
-	// will not write more bytes to addr than specified. If it writes fewer than specified,
-	// it will change the value of addrlen.
-	while (true)
-	{
-        std::string buf(1024, '\0');
+	std::map<int, std::string> recvBuffers;  // Buffer per client
+
+	std::cout << "[SERVER] Running and listening on port " << _port << std::endl;
+
+	while (true) {
+		std::cout << "[SERVER] Waiting for new client connection..." << std::endl;
+		clientid = accept(this->_serverSocket, (struct sockaddr*)&addr, &addrlen);
+		if (clientid == -1) {
+			perror("[ERROR] accept()");
+			continue;
+		}
+
+		std::cout << "[SERVER] New connection accepted. FD = " << clientid << std::endl;
+
+		// Ensure user is tracked
+		if (_users.find(clientid) == _users.end()) {
+			User* newUser = new User(clientid);
+			_users[clientid] = newUser;
+		}
+
+		std::string buf(1024, '\0');
 		bytesRead = recv(clientid, &buf[0], 1024, 0);
-		// int recv(int sockfd, void *buf, int len, int flags);
-		// sockfd is the socket descriptor to read from,
-		// buf is the buffer to read from,
-		// len is the maximum length of the buffer,
-		// flags can again be set to 0 (see the recv() man page.)
-		if (bytesRead == -1)
-			break ;
-		std::cout << "Client says: " << buf.substr(0, bytesRead) << "\n";
-        std::string reply = "KILL ALL HUMANS!!!\n";
-		send(clientid, reply.c_str(), reply.size(), 0);
-		// int send(int sockfd, const void *msg, int len, int flags);
-		// sockfd is the socket descriptor where you want to send the data
-		//(probably returned by socket() or received by accept().)
-		// msg is a pointer to the data to send.
-		// len is the length of that data in bytes.
-		// flags is simply set to 0 . (See the man page for the send()
-		// call for some information on flags.)
-        buf.clear();
+		if (bytesRead <= 0) {
+			std::cerr << "[WARNING] Client " << clientid << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
+			close(clientid);
+			delete _users[clientid];
+			_users.erase(clientid);
+			recvBuffers.erase(clientid);
+			continue;
+		}
+
+		std::string& buffer = recvBuffers[clientid];
+		buffer.append(buf, 0, bytesRead);
+		size_t pos;
+		while ((pos = buffer.find("\r\n")) != std::string::npos) {
+			std::string line = buffer.substr(0, pos);
+			buffer.erase(0, pos + 2);
+			try {
+				_commandHandler->handleCommand(clientid, line);
+			} catch (const std::exception& ex) {
+				std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
+			} catch (...) {
+				std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
+			}
+
+			flushSendBuffer(clientid);
+		}
 	}
-    close(clientid);
+	///////////////////////
+
+	// struct sockaddr	addr;
+	// socklen_t		addrlen;
+	// int				clientid;
+	// int				bytesRead;
+
+	// //std::string buf(1024, '\0');
+	// addrlen = sizeof(addr);
+	// std::cout << "Server is running and listening on port " << _port << "\n";
+	// clientid = accept(this->_serverSocket, &addr, &addrlen);
+	// if (clientid == -1)
+	// {
+	// 	perror("accept");
+	// 	return ;
+	// }
+	// //   int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+	// // sockfd is the listening socket descriptor. Simple enough.
+	// // --------------
+	// // addr will usually be a pointer to a local sockaddr structure.
+	// // This is where information about incoming connections goes (you can use it to determine
+	// // which host is calling you and from which port).
+	// // --------------
+	// // addrlen is a local integer variable that must contain the size of the
+	// // struct sockaddr_storage before its address is passed to accept(). accept()
+	// // will not write more bytes to addr than specified. If it writes fewer than specified,
+	// // it will change the value of addrlen.
+	// while (true)
+	// {
+    //     std::string buf(1024, '\0');
+	// 	bytesRead = recv(clientid, &buf[0], 1024, 0);
+	// 	// int recv(int sockfd, void *buf, int len, int flags);
+	// 	// sockfd is the socket descriptor to read from,
+	// 	// buf is the buffer to read from,
+	// 	// len is the maximum length of the buffer,
+	// 	// flags can again be set to 0 (see the recv() man page.)
+	// 	if (bytesRead == -1)
+	// 		break ;
+	// 	std::cout << "Client says: " << buf.substr(0, bytesRead) << "\n";
+    //     std::string reply = "KILL ALL HUMANS!!!\n";
+	// 	send(clientid, reply.c_str(), reply.size(), 0);
+	// 	// int send(int sockfd, const void *msg, int len, int flags);
+	// 	// sockfd is the socket descriptor where you want to send the data
+	// 	//(probably returned by socket() or received by accept().)
+	// 	// msg is a pointer to the data to send.
+	// 	// len is the length of that data in bytes.
+	// 	// flags is simply set to 0 . (See the man page for the send()
+	// 	// call for some information on flags.)
+    //     buf.clear();
+	// }
+    // close(clientid);
 }
 
 Server::Server(int port, const std::string &password)
@@ -194,9 +255,73 @@ Server::Server(int port, const std::string &password)
 	this->_port = port;
 	this->_password = password;
 	this->_serverSocket = setupSocket();
+
+	//new
+	this->_commandHandler = new CommandHandler(*this, this->_password, this->_users);
 }
 
 Server::~Server()
-{
+{	
+	//new
+	delete this->_commandHandler;
 	std::cout << "DEBUG: Server is destroyed";
 }
+
+//new
+User* Server::getUserByFd(int fd) {
+    std::map<int, User*>::iterator it = _users.find(fd);
+    if (it != _users.end()) {
+        return it->second;
+    }
+    return NULL;
+}
+
+Channel* Server::getChannelByName(const std::string& name) {
+    std::map<std::string, Channel*>::iterator it = _channels.find(name);
+    if (it != _channels.end()) {
+        return it->second;
+    }
+    return NULL;
+}
+
+void Server::addUser(int fd, User* user) {
+    if (user) {
+        _users[fd] = user;
+    }
+}
+
+void Server::addChannel(const std::string& name, Channel* channel) {
+    if (channel) {
+        _channels[name] = channel;
+    }
+}
+
+User* Server::getUserByNick(const std::string& nick) {
+    for (std::map<int, User*>::iterator it = _users.begin(); it != _users.end(); ++it) {
+        if (it->second->getNickname() == nick) {
+            return it->second;
+        }
+    }
+    return 0;
+}
+
+void Server::flushSendBuffer(int fd) {
+    User* user = getUserByFd(fd);
+    if (!user) {
+        std::cerr << "[ERROR] flushSendBuffer: User for FD " << fd << " not found" << std::endl;
+        return;
+    }
+
+    std::string& buffer = user->getSendBuffer();
+    if (buffer.empty()) {
+        return;
+    }
+
+    ssize_t bytesSent = send(fd, buffer.c_str(), buffer.size(), 0);
+    if (bytesSent < 0) {
+        perror("[ERROR] send");
+        return;
+    }
+    buffer.erase(0, bytesSent);
+}
+///////////////////
