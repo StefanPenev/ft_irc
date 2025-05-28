@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:55:01 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 11:15:55 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 13:10:26 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,10 @@ void ReplyBuilder::init(const std::string& serverName) {
     _templates[RPL_NOTOPIC]          = ":<server> 331 <nick> <arg> :No topic is set";
     _templates[RPL_TOPIC]            = ":<server> 332 <nick> <arg> :<msg>";
     _templates[ERR_UNKNOWNCOMMAND]   = ":<server> 421 <nick> <arg> :Unknown command";
+    _templates[RPL_INVITING]         = ":<server> 341 <nick> <arg> :Inviting";
+    _templates[RPL_AWAY]             = ":<server> 301 <nick> <arg> :<msg>";
+    _templates[ERR_USERONCHANNEL]    = ":<server> 443 <nick> <arg> :is already on channel";
+    _templates[ERR_NOSUCHNICK]       = ":<server> 401 <nick> <arg> :No such nick/channel";
 }
 
 std::string ReplyBuilder::build(int code, const User& user, const std::string& arg, const std::string& msg) {

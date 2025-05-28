@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 12:46:01 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 12:58:04 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,63 @@ void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
     channel->removeUser(target);
     target->leaveChannel(chanName);
 }
+
+//Handle Invite
+void CommandHandler::handleInvite(int fd, const std::vector<std::string>& args) {
+    User* user = _server.getUserByFd(fd);
+    if (!user)
+        return;
+
+    // Check for enough parameters
+    if (args.size() < 3) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "INVITE");
+        return;
+    }
+
+    const std::string& targetNick = args[1];
+    const std::string& channelName = args[2];
+
+    Channel* channel = _server.getChannelByName(channelName);
+    if (!channel) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *user, channelName);
+        return;
+    }
+
+    // Check if inviter is a member of the channel
+    if (!channel->isMember(user)) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NOTONCHANNEL, *user, channelName);
+        return;
+    }
+
+    // Check invite privileges if channel is invite-only (+i)
+    if (channel->isInviteOnly() && !channel->isOperator(user)) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, channelName);
+        return;
+    }
+
+    User* targetUser = _server.getUserByNick(targetNick);
+    if (!targetUser) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHNICK, *user, targetNick);
+        return;
+    }
+
+    // Check if target user is already in the channel
+    if (channel->isMember(targetUser)) {
+        user->getSendBuffer() += ReplyBuilder::build(ERR_USERONCHANNEL, *user, targetNick, channelName);
+        return;
+    }
+
+    // Add to invite list if channel tracks it
+    channel->inviteUser(targetUser);
+
+    // Send RPL_INVITING to inviter
+    user->getSendBuffer() += ReplyBuilder::build(RPL_INVITING, *user, targetNick, channelName);
+
+    // Notify invited user
+    std::string inviteMsg = ":" + user->getPrefix() + " INVITE " + targetNick + " :" + channelName + "\r\n";
+    targetUser->getSendBuffer() += inviteMsg;
+}
+
 
 //Handle Topic
 void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {

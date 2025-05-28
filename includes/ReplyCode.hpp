@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:54:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 11:13:56 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 13:11:48 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ enum ReplyCode {
     RPL_CHANNELMODEIS = 324,
     RPL_NOTOPIC = 331,
     RPL_TOPIC = 332,
+    RPL_INVITING = 341,
+    RPL_AWAY = 301,
 
     ERR_NONICKNAMEGIVEN = 431,
     ERR_ERRONEUSNICKNAME = 432,
@@ -29,7 +31,9 @@ enum ReplyCode {
     ERR_PASSWDMISMATCH = 464,
 
     ERR_NOSUCHCHANNEL = 403,
+    ERR_NOSUCHNICK = 401,
     ERR_NOTONCHANNEL = 442,
+    ERR_USERONCHANNEL = 443,
     ERR_USERNOTINCHANNEL = 441,
     ERR_UNKNOWNMODE = 472,
     ERR_CHANOPRIVSNEEDED = 482,
