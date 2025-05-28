@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:55:01 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 13:10:26 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 22:34:07 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ void ReplyBuilder::init(const std::string& serverName) {
     _templates[RPL_AWAY]             = ":<server> 301 <nick> <arg> :<msg>";
     _templates[ERR_USERONCHANNEL]    = ":<server> 443 <nick> <arg> :is already on channel";
     _templates[ERR_NOSUCHNICK]       = ":<server> 401 <nick> <arg> :No such nick/channel";
+    _templates[ERR_CANNOTSENDTOCHAN] = ":<server> 404 <nick> <arg> :<msg>";
 }
 
 std::string ReplyBuilder::build(int code, const User& user, const std::string& arg, const std::string& msg) {

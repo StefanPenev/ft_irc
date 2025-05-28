@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 12:54:17 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/29 00:19:27 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,9 @@ private:
     void handleTopic(int fd, const std::vector<std::string>& args);
     void handleInvite(int fd, const std::vector<std::string>& args);
     void handleKick(int fd, const std::vector<std::string>& args);
-    // void handlePrivmsg(int fd, const std::vector<std::string>& args);
+    void handlePrivmsg(int fd, const std::vector<std::string>& args);
+    void handleNotice(int fd, const std::vector<std::string>& args);
+    void handleMessage(int fd, const std::vector<std::string>& args, bool isPrivmsg);
 };
 
 #endif

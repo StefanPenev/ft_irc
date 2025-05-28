@@ -6,7 +6,7 @@
 #    By: stefan <stefan@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/15 13:03:18 by anilchen          #+#    #+#              #
-#    Updated: 2025/05/25 16:29:08 by stefan           ###   ########.fr        #
+#    Updated: 2025/05/28 22:37:23 by stefan           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,7 @@ SRC += $(SRC_DIR)/User.cpp \
 SRC += $(SRC_DIR)/commands/AuthCommands.cpp \
 		$(SRC_DIR)/commands/CommandHandler.cpp \
 		$(SRC_DIR)/commands/ChannelCommands.cpp \
+		$(SRC_DIR)/commands/MessagingCommands.cpp \
 
 SRC += $(SRC_DIR)/command_utils/ReplyBuilder.cpp \
 		$(SRC_DIR)/command_utils/CommandParser.cpp \

@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:25 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 12:54:28 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/28 22:32:12 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ CommandHandler::CommandHandler(Server& server, const std::string& serverPassword
     _handlers["TOPIC"] = &CommandHandler::handleTopic;
     _handlers["INVITE"] = &CommandHandler::handleInvite;
     _handlers["KICK"] = &CommandHandler::handleKick;
-    // _handlers["PRIVMSG"] = &CommandHandler::handlePrivmsg;
+    _handlers["PRIVMSG"] = &CommandHandler::handlePrivmsg;
+    _handlers["NOTICE"] = &CommandHandler::handlePrivmsg;
 }
 
 void CommandHandler::handleCommand(int fd, const std::string& line) {
