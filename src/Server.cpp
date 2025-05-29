@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/29 11:57:36 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/29 12:02:13 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ Server::~Server()
 {	
 	//new
 	delete this->_commandHandler;
-	std::cout << "DEBUG: Server is destroyed";
+	std::cout << "DEBUG: Server is destroyed" << "\n";
 }
 
 //new - You can change the logic of these functions as long as you keep their names, since they are called by CommandHandler.
