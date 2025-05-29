@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:25 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 00:13:06 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 01:09:22 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,4 @@ void CommandHandler::handleCommand(int fd, const std::string& line) {
         User* user = _server.getUserByFd(fd);
         user->getSendBuffer() += ReplyBuilder::build(ERR_UNKNOWNCOMMAND, *user, cmd);
     }
-}
-
-User* CommandHandler::findUserByNick(const std::string& nick) {
-    return _server.getUserByNick(nick);
 }

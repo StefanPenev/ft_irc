@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:41:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 00:30:20 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 01:08:59 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
         oss << ":" << sender->getPrefix() << " " << (isPrivmsg ? "PRIVMSG" : "NOTICE") << " " << target << " :" << message << "\r\n";
         channel->broadcast(oss.str(), sender);
     } else {
-        User* recipient = findUserByNick(target);
+        User* recipient = _server.getUserByNick(target);
         if (!recipient) {
             if (isPrivmsg)
                 sender->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHNICK, *sender, target);

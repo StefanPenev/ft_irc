@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 00:58:23 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 01:08:44 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,7 +290,7 @@ void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
                     }
                     {
                         std::string nick = args[paramIndex++];
-                        User* targetUser = findUserByNick(nick);
+                        User* targetUser = _server.getUserByNick(nick);
                         if (!targetUser || !targetUser->isInChannel(target)) {
                             user->getSendBuffer() += ReplyBuilder::build(ERR_USERNOTINCHANNEL, *user, nick, target);
                             continue;

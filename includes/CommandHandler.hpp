@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/29 23:47:44 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 01:09:13 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ class CommandHandler {
 public:
     CommandHandler(Server& server, const std::string& serverPassword);
     void handleCommand(int clientFd, const std::string& line);
-    User* findUserByNick(const std::string& nick);
 
 private:
     typedef void (CommandHandler::*HandlerFn)(int, const std::vector<std::string>&);
