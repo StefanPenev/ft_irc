@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/28 11:54:36 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/29 11:57:36 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,11 +148,11 @@ void Server::run()
 	socklen_t addrlen = sizeof(addr);
 	int clientid;
 	int bytesRead;
-
-	std::map<int, std::string> recvBuffers;  // Buffer per client
-
+	
+	std::map<int, std::string> recvBuffers;
+	
 	std::cout << "[SERVER] Running and listening on port " << _port << std::endl;
-
+	
 	while (true) {
 		std::cout << "[SERVER] Waiting for new client connection..." << std::endl;
 		clientid = accept(this->_serverSocket, (struct sockaddr*)&addr, &addrlen);
@@ -160,15 +160,15 @@ void Server::run()
 			perror("[ERROR] accept()");
 			continue;
 		}
-
+	
 		std::cout << "[SERVER] New connection accepted. FD = " << clientid << std::endl;
-
-		// Ensure user is tracked
+	
+		//CHAINING POINT: User object is created as soon as a new client connects
 		if (_users.find(clientid) == _users.end()) {
 			User* newUser = new User(clientid);
 			_users[clientid] = newUser;
 		}
-
+	
 		std::string buf(1024, '\0');
 		bytesRead = recv(clientid, &buf[0], 1024, 0);
 		if (bytesRead <= 0) {
@@ -179,13 +179,17 @@ void Server::run()
 			recvBuffers.erase(clientid);
 			continue;
 		}
-
+	
 		std::string& buffer = recvBuffers[clientid];
 		buffer.append(buf, 0, bytesRead);
+	
 		size_t pos;
+		//CHAINING POINT: Check for complete command line (IRC commands end with \r\n)
 		while ((pos = buffer.find("\r\n")) != std::string::npos) {
 			std::string line = buffer.substr(0, pos);
 			buffer.erase(0, pos + 2);
+	
+			//CHAINING POINT: Call to Team B's command processing logic
 			try {
 				_commandHandler->handleCommand(clientid, line);
 			} catch (const std::exception& ex) {
@@ -193,10 +197,10 @@ void Server::run()
 			} catch (...) {
 				std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
 			}
-
+	
 			flushSendBuffer(clientid);
 		}
-	}
+	}	
 	///////////////////////
 
 	// struct sockaddr	addr;
@@ -267,7 +271,7 @@ Server::~Server()
 	std::cout << "DEBUG: Server is destroyed";
 }
 
-//new
+//new - You can change the logic of these functions as long as you keep their names, since they are called by CommandHandler.
 User* Server::getUserByFd(int fd) {
     std::map<int, User*>::iterator it = _users.find(fd);
     if (it != _users.end()) {
