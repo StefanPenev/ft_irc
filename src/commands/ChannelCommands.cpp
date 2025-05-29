@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 13:15:40 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/29 22:42:54 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,9 @@ void CommandHandler::handleInvite(int fd, const std::vector<std::string>& args) 
 //Handle Topic
 void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
     User* user = _server.getUserByFd(fd);
+    if (!user)
+        return;
+
     if (args.size() < 2) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "TOPIC");
         return;
@@ -143,8 +146,8 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
         return;
     }
 
+    // --- Topic query ---
     if (args.size() == 2) {
-        // Query topic
         if (channel->hasTopic()) {
             user->getSendBuffer() += ReplyBuilder::build(RPL_TOPIC, *user, chanName, channel->getTopic());
         } else {
@@ -153,24 +156,27 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
         return;
     }
 
-    // Topic modification
-    std::string topic = args[2];
-    for (size_t i = 3; i < args.size(); ++i)
-        topic += " " + args[i];
-
-    // Remove leading colon (if present)
-    if (!topic.empty() && topic[0] == ':')
-        topic = topic.substr(1);
-
-    // If +t mode, only ops can change topic
+    // --- Topic setting ---
+    // Check if channel is +t (topic locked) and user is not an operator
     if (channel->isTopicLocked() && !channel->isOperator(user)) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, chanName);
         return;
     }
 
-    channel->setTopic(topic);
+    // Construct topic from args[2..]
+    std::string topic;
+    for (size_t i = 2; i < args.size(); ++i) {
+        if (!topic.empty())
+            topic += " ";
+        topic += args[i];
+    }
 
-    // Broadcast new topic to all members
+    // Remove leading colon if present
+    if (!topic.empty() && topic[0] == ':')
+        topic = topic.substr(1);
+
+    // Set and broadcast the new topic
+    channel->setTopic(topic);
     std::string msg = ":" + user->getPrefix() + " TOPIC " + chanName + " :" + topic + "\r\n";
     channel->broadcast(msg);
 }
