@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/29 00:19:27 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/29 23:47:44 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Server;
 
 class CommandHandler {
 public:
-    CommandHandler(Server& server, const std::string& serverPassword, std::map<int, User*>& users);
+    CommandHandler(Server& server, const std::string& serverPassword);
     void handleCommand(int clientFd, const std::string& line);
     User* findUserByNick(const std::string& nick);
 
@@ -34,8 +34,6 @@ private:
     std::map<std::string, HandlerFn> _handlers;
     std::string _serverPassword;
     Server& _server;
-    std::map<int, User*>& _users;    
-    std::map<std::string, Channel*> _channels;
     
     bool isValidNickname(const std::string& nick) const;
     bool isNicknameTaken(const std::string& nick) const;

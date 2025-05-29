@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:41:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/29 00:20:06 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:30:20 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #include <sstream>
 
 void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args, bool isPrivmsg) {
-    User* sender = _users[fd];
+    User* sender = _server.getUserByFd(fd);
     if (!sender || sender->getState() != User::REGISTERED) {
         if (isPrivmsg)
             sender->getSendBuffer() += ReplyBuilder::build(ERR_NOTREGISTERED, *sender);

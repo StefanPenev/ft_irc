@@ -6,20 +6,22 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:55 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 16:45:36 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:53:02 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandHandler.hpp"
 #include "ReplyBuilder.hpp"
 #include "ReplyCode.hpp"
+#include "Server.hpp"
 #include <sstream>
 #include <cctype>
 #include <iostream>
 
-//Hanle Pass
+// Handle PASS
 void CommandHandler::handlePass(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
+    if (!user) return;
 
     if (user->getState() == User::REGISTERED) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_ALREADYREGISTRED, *user);
@@ -39,9 +41,10 @@ void CommandHandler::handlePass(int fd, const std::vector<std::string>& args) {
     user->setState(User::PASSWORD_SENT);
 }
 
-//Handle Nick
+// Handle NICK
 void CommandHandler::handleNick(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
+    if (!user) return;
 
     if (args.empty()) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NONICKNAMEGIVEN, *user);
@@ -55,7 +58,7 @@ void CommandHandler::handleNick(int fd, const std::vector<std::string>& args) {
         return;
     }
 
-    if (isNicknameTaken(newNick)) {
+    if (_server.getUserByNick(newNick)) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NICKNAMEINUSE, *user, newNick);
         return;
     }
@@ -70,9 +73,10 @@ void CommandHandler::handleNick(int fd, const std::vector<std::string>& args) {
     tryRegisterUser(user);
 }
 
-//Handle User
+// Handle USER
 void CommandHandler::handleUser(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
+    if (!user) return;
 
     if (user->getState() == User::REGISTERED) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_ALREADYREGISTRED, *user);
@@ -88,7 +92,7 @@ void CommandHandler::handleUser(int fd, const std::vector<std::string>& args) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "USER");
         return;
     }
-    
+
     user->setUsername(args[0]);
 
     std::string realname = args[3];
@@ -104,12 +108,12 @@ void CommandHandler::handleUser(int fd, const std::vector<std::string>& args) {
     tryRegisterUser(user);
 }
 
-//Util functions
+// Utility functions
 bool CommandHandler::isValidNickname(const std::string& nick) const {
     if (nick.empty())
         return false;
 
-    // Cannot start with digit or #/&
+    // Cannot start with digit or invalid char
     if (!isalpha(nick[0]) && nick[0] != '_' && nick[0] != '-' && nick[0] != '[')
         return false;
 
@@ -119,16 +123,7 @@ bool CommandHandler::isValidNickname(const std::string& nick) const {
               c == '\\' || c == '`' || c == '^' || c == '{' || c == '}'))
             return false;
     }
-
     return true;
-}
-
-bool CommandHandler::isNicknameTaken(const std::string& nick) const {
-    for (std::map<int, User*>::const_iterator it = _users.begin(); it != _users.end(); ++it) {
-        if (it->second->getNickname() == nick)
-            return true;
-    }
-    return false;
 }
 
 void CommandHandler::tryRegisterUser(User* user) {

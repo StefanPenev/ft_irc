@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:25 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 22:32:12 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:13:06 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@
 #include <cctype>
 #include <iostream>
 
-CommandHandler::CommandHandler(Server& server, const std::string& serverPassword, std::map<int, User*>& users)
-: _serverPassword(serverPassword), _server(server), _users(users) {
+CommandHandler::CommandHandler(Server& server, const std::string& serverPassword)
+: _serverPassword(serverPassword), _server(server) {
     _handlers["PASS"] = &CommandHandler::handlePass;
     _handlers["NICK"] = &CommandHandler::handleNick;
     _handlers["USER"] = &CommandHandler::handleUser;
@@ -50,16 +50,11 @@ void CommandHandler::handleCommand(int fd, const std::string& line) {
     if (it != _handlers.end()) {
         (this->*(it->second))(fd, args);
     } else {
-        User* user = _users[fd];
+        User* user = _server.getUserByFd(fd);
         user->getSendBuffer() += ReplyBuilder::build(ERR_UNKNOWNCOMMAND, *user, cmd);
     }
 }
 
 User* CommandHandler::findUserByNick(const std::string& nick) {
-    for (std::map<int, User*>::iterator it = _users.begin(); it != _users.end(); ++it) {
-        if (it->second && it->second->getNickname() == nick) {
-            return it->second;
-        }
-    }
-    return NULL; 
+    return _server.getUserByNick(nick);
 }

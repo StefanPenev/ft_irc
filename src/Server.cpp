@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/29 12:02:13 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:28:54 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ Server::Server(int port, const std::string &password)
 	this->_serverSocket = setupSocket();
 
 	//new
-	this->_commandHandler = new CommandHandler(*this, this->_password, this->_users);
+	this->_commandHandler = new CommandHandler(*this, this->_password);
 }
 
 Server::~Server()
@@ -327,5 +327,18 @@ void Server::flushSendBuffer(int fd) {
         return;
     }
     buffer.erase(0, bytesSent);
+}
+
+Channel* Server::getOrCreateChannel(const std::string& name, User* user) {
+    Channel* channel = getChannelByName(name);
+    if (!channel) {
+        channel = new Channel(name);
+        _channels[name] = channel;
+
+        channel->addUser(user);
+        channel->setOperatorStatus(user, true);
+        user->joinChannel(name);
+    }
+    return channel;
 }
 ///////////////////

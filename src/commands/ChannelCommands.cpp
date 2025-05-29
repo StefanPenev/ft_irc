@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/29 22:42:54 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:58:23 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 //Handle Kick
 void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
-    User* sender = _users[fd];
+    User* sender = _server.getUserByFd(fd);
 
     if (args.size() < 2) {
         sender->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *sender, "KICK");
@@ -183,7 +183,7 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
 
 //Handle Mode
 void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
     if (user->getState() != User::REGISTERED) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NOTREGISTERED, *user);
         return;
@@ -201,13 +201,11 @@ void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
         return;
     }
 
-    std::map<std::string, Channel*>::iterator it = _channels.find(target);
-    if (it == _channels.end() || !it->second) {
-        user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *user, target);
-        return;
+    Channel* channel = _server.getChannelByName(target);
+    if (!channel) {
+    user->getSendBuffer() += ReplyBuilder::build(ERR_NOSUCHCHANNEL, *user, target);
+    return;
     }
-
-    Channel* channel = it->second;
 
     if (!user->isInChannel(target)) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NOTONCHANNEL, *user, target);
@@ -322,7 +320,7 @@ void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
 
 //Handle Part
 void CommandHandler::handlePart(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
 
     // Must be REGISTERED
     if (user->getState() != User::REGISTERED) {
@@ -383,7 +381,7 @@ void CommandHandler::handlePart(int fd, const std::vector<std::string>& args) {
 
 //Handle Join
 void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
-    User* user = _users[fd];
+    User* user = _server.getUserByFd(fd);
 
     if (user->getState() != User::REGISTERED) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NOTREGISTERED, *user);
@@ -414,25 +412,8 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
     while (std::getline(ss, chanName, ',')) {
         if (chanName.empty()) continue;
 
-        Channel* channel = NULL;
-        std::map<std::string, Channel*>::iterator it = _channels.find(chanName);
-
-        // Create channel if it doesn't exist
-        if (it == _channels.end()) {
-            channel = new Channel(chanName);
-            _channels[chanName] = channel;
-
-            // Add user to channel and set as operator
-            channel->addUser(user);
-            channel->setOperatorStatus(user, true);
-            user->joinChannel(chanName);
-
-            // Send JOIN
-            user->getSendBuffer() += ":" + user->getNickname() + " JOIN :" + chanName + "\r\n";
-            continue;
-        }
-
-        channel = it->second;
+        Channel* channel = _server.getOrCreateChannel(chanName, user);
+        user->getSendBuffer() += ":" + user->getNickname() + " JOIN :" + chanName + "\r\n";
 
         // Check if user is already in the channel
         if (user->isInChannel(chanName)) {

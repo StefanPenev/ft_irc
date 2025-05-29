@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:28:46 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/28 10:56:11 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 00:29:22 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class Server
     void addUser(int fd, User* user);
     void addChannel(const std::string& name, Channel* channel);
 	User* getUserByNick(const std::string& nick);
+	Channel* getOrCreateChannel(const std::string& name, User* user);
 	/////
 };
 
