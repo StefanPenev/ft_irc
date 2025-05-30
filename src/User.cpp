@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 23:51:59 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 19:55:03 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 15:36:39 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,10 @@ bool User::isChannelOperator(const std::string& channelName) const {
 
 std::string User::getPrefix() const {
     return _nickname + "!" + _username + "@" + _hostname;
+}
+
+
+void User::SetRecvBuffer(const std::string &msg) //anna
+{
+    this->_recvBuffer = msg;
 }

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: stefan <stefan@student.42.fr>              +#+  +:+       +#+         #
+#    By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/15 13:03:18 by anilchen          #+#    #+#              #
-#    Updated: 2025/05/30 01:13:37 by stefan           ###   ########.fr        #
+#    Updated: 2025/05/30 13:15:07 by anilchen         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,7 @@ SRC += $(SRC_DIR)/User.cpp \
 		$(SRC_DIR)/Server.cpp \
 		$(SRC_DIR)/Channel.cpp \
 		$(SRC_DIR)/ServerUtils.cpp \
+		$(SRC_DIR)/PollManager.cpp  \
 
 		
 SRC += $(SRC_DIR)/commands/AuthCommands.cpp \

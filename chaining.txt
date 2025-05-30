@@ -30,16 +30,21 @@ Client        Server                             User Object
 | Append to user’s send buffer   | Team B         | `User::getSendBuffer() += response`                              |
 | `flushSendBuffer(fd)`          | Team A         | Sends pending data to the client.                                |
 
-1.When a new client connects via accept(), we immediately create a User object and store it by its socket file descriptor (fd).
+1.When a new client connects via accept(), we immediately create a User object 
+and store it by its socket file descriptor (fd).
 
-2.recv() Buffers Data Per Client As messages come in, we buffer them per client and look for complete lines ending in \r\n.
+2.recv() Buffers Data Per Client As messages come in, we buffer them per client 
+and look for complete lines ending in \r\n.
 
 3.Command is Dispatched to Command Handler
 
+I made a small change in the server code to allow testing with actual commands. 
+Currently, the server only processes one message per client—this is just for testing 
+purposes and to remove the hardcoded "KILL ALL HUMANS" response.
 
-I made a small change in the server code to allow testing with actual commands. Currently, the server only processes one message per client—this is just for testing purposes and to remove the hardcoded "KILL ALL HUMANS" response.
-
-You are free to redesign or replace the run loop as needed when integrating your part. I’ve added comments highlighting the key chaining points between the server logic and your command handling:
+You are free to redesign or replace the run loop as needed when integrating your part. 
+I’ve added comments highlighting the key chaining points between the server logic and 
+your command handling:
 
 Create a new User object when a client connects.
 

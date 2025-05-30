@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 23:52:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 19:54:29 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 15:36:47 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ public:
     void setHostname(const std::string& host);
     void setState(State state);
     void setOperator(bool value);
+    void SetRecvBuffer(const std::string& msg); //anna
 
     // Channel management
     void joinChannel(const std::string& name);
@@ -72,6 +73,8 @@ private:
     std::string _recvBuffer;
     std::string _sendBuffer;
     std::map<std::string, bool> _channelOps;
+    //std::map<int, std::string> recvBuffers; //anna
+    
 };
 
 #endif

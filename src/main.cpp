@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:54:43 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/30 00:53:28 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/30 16:10:47 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
 #include "ReplyBuilder.hpp"
+#include "Server.hpp"
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 
-//hexchat
+// hexchat
 
 int	main(int argc, char const **argv)
 {
@@ -25,25 +25,30 @@ int	main(int argc, char const **argv)
 
 	if (argc != 3)
 	{
-		std::cerr << "Usage: ./ircserv <port> <password>\n";
+		std::cerr << "[USAGE]: ./ircserv <port> <password>\n";
 		return (1);
 	}
 	for (int i = 0; argv[1][i] != '\0'; i++)
 	{
 		if (!std::isdigit(argv[1][i]))
 		{
-			std::cerr << "Error: Port must contain only digits\n";
+			std::cerr << "[ERROR]: Port must contain only digits\n";
 			return (1);
 		}
 	}
 	port = atoi(argv[1]);
+	if (port < 1024 || port > 65535)
+	{
+		std::cerr << "[ERROR]: Invalid port number. Please specify a number between 1024 and 65535.\n";
+		return (1);
+	}
 	ReplyBuilder::init("ircserv");
 	Server serv(port, argv[2]);
 	serv.run();
 	return (0);
 }
 
-//Tests for CommandHandler
+// Tests for CommandHandler
 // #include <iostream>
 // #include <vector>
 // #include <string>
@@ -55,9 +60,9 @@ int	main(int argc, char const **argv)
 
 // int main() {
 //     std::map<int, User*> users;
-//     ReplyBuilder::init("ircserv"); 
+//     ReplyBuilder::init("ircserv");
 //     Server fakeServer(6667, "pass");
-    
+
 //     CommandHandler handler(fakeServer, "pass");
 
 //     int fd1 = 1;
@@ -93,7 +98,7 @@ int	main(int argc, char const **argv)
 //     testCommands.push_back("INVITE othernick #testchannel");
 //     testCommands.push_back("KICK #testchannel othernick :bye!");
 //     testCommands.push_back("TOPIC #testchannel :Welcome to the test channel");
-//     testCommands.push_back("TOPIC #testchannel"); 
+//     testCommands.push_back("TOPIC #testchannel");
 
 //     // Invalid commands
 //     testCommands.push_back("");
@@ -130,5 +135,5 @@ int	main(int argc, char const **argv)
 //     delete user1;
 //     delete user2;
 
-//     return 0;
+//     return (0);
 // }
