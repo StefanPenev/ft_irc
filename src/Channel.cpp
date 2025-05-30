@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:29:52 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 19:51:06 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/31 00:19:10 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,15 @@ bool Channel::isOperator(User* user) const {
     return it != _operators.end();
 }
 
+// void Channel::addUser(User* user) {
+//     _members.insert(user);
+//     _invited.erase(user);
+// }
 void Channel::addUser(User* user) {
     _members.insert(user);
     _invited.erase(user);
+    if (_members.size() == 1)
+        setOperatorStatus(user, true);
 }
 
 void Channel::removeUser(User* user) {

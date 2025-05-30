@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 01:08:44 by stefan           ###   ########.fr       */
+/*   Updated: 2025/05/31 00:17:17 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,15 +51,15 @@ void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
 
     User* target = _server.getUserByNick(targetNick);
     if (!target || !channel->isMember(target)) {
-        sender->getSendBuffer() += ReplyBuilder::build(ERR_USERNOTINCHANNEL, *sender, targetNick + " " + chanName);
+        sender->getSendBuffer() += ReplyBuilder::build(ERR_USERNOTINCHANNEL, *sender, targetNick, chanName);
         return;
     }
 
-    // Broadcast KICK message to all channel users
+    // Broadcast KICK message to all channel users (including target)
     std::string kickMsg = ":" + sender->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
     channel->broadcast(kickMsg);
 
-    // Actually remove the user from the channel
+    // Remove the user from the channel
     channel->removeUser(target);
     target->leaveChannel(chanName);
 }
@@ -71,13 +71,13 @@ void CommandHandler::handleInvite(int fd, const std::vector<std::string>& args) 
         return;
 
     // Check for enough parameters
-    if (args.size() < 3) {
+    if (args.size() < 2) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "INVITE");
         return;
     }
 
-    const std::string& targetNick = args[1];
-    const std::string& channelName = args[2];
+    const std::string& targetNick = args[0];
+    const std::string& channelName = args[1];
 
     Channel* channel = _server.getChannelByName(channelName);
     if (!channel) {
@@ -127,12 +127,13 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
     if (!user)
         return;
 
-    if (args.size() < 2) {
+    // Only one parameter is required for a topic query
+    if (args.size() < 1) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_NEEDMOREPARAMS, *user, "TOPIC");
         return;
     }
 
-    const std::string& chanName = args[1];
+    const std::string& chanName = args[0];
     Channel* channel = _server.getChannelByName(chanName);
 
     if (!channel) {
@@ -147,7 +148,7 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
     }
 
     // --- Topic query ---
-    if (args.size() == 2) {
+    if (args.size() == 1) {
         if (channel->hasTopic()) {
             user->getSendBuffer() += ReplyBuilder::build(RPL_TOPIC, *user, chanName, channel->getTopic());
         } else {
@@ -157,25 +158,20 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
     }
 
     // --- Topic setting ---
-    // Check if channel is +t (topic locked) and user is not an operator
     if (channel->isTopicLocked() && !channel->isOperator(user)) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, chanName);
         return;
     }
 
-    // Construct topic from args[2..]
     std::string topic;
-    for (size_t i = 2; i < args.size(); ++i) {
+    for (size_t i = 1; i < args.size(); ++i) {
         if (!topic.empty())
             topic += " ";
         topic += args[i];
     }
-
-    // Remove leading colon if present
     if (!topic.empty() && topic[0] == ':')
         topic = topic.substr(1);
 
-    // Set and broadcast the new topic
     channel->setTopic(topic);
     std::string msg = ":" + user->getPrefix() + " TOPIC " + chanName + " :" + topic + "\r\n";
     channel->broadcast(msg);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/30 15:56:16 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/05/30 23:15:09 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,7 @@ void Server::handleNewConnection()
 		newUser = _users[clientid];
 	}
 	newUser->SetRecvBuffer("");
+	_pollManager.addFd(clientid);
 }
 
 void Server::handleClientMessage(int clientFd)
