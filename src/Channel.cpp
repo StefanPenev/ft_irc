@@ -6,11 +6,12 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:29:52 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/31 00:19:10 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 21:07:12 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
+#include "Server.hpp"
 #include "User.hpp"
 #include <sstream>
 #include <cstdlib>
@@ -83,10 +84,6 @@ bool Channel::isOperator(User* user) const {
     return it != _operators.end();
 }
 
-// void Channel::addUser(User* user) {
-//     _members.insert(user);
-//     _invited.erase(user);
-// }
 void Channel::addUser(User* user) {
     _members.insert(user);
     _invited.erase(user);
@@ -146,10 +143,12 @@ bool Channel::hasTopic() const {
     return !_topic.empty();
 }
 
-void Channel::broadcast(const std::string& message, User* except) {
+void Channel::broadcast(const std::string& message, User* except, Server* server) {
     for (std::set<User*>::iterator it = _members.begin(); it != _members.end(); ++it) {
         if (*it != except) {
             (*it)->getSendBuffer() += message;
+            if (server)
+                server->flushSendBuffer((*it)->getFd());
         }
     }
 }

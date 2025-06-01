@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 01:12:14 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 01:15:08 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 21:09:03 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,27 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <cstdio>
+#include <unistd.h>
 
-//You can change the logic of these functions as long as you keep their names, since they are called by CommandHandler.
 User* Server::getUserByFd(int fd) {
     std::map<int, User*>::iterator it = _users.find(fd);
     if (it != _users.end()) {
         return it->second;
     }
     return NULL;
+}
+
+void Server::removeUserByFd(int fd) {
+    _pollManager.removeFd(fd);
+    
+    flushSendBuffer(fd);
+    close(fd);
+    
+    std::map<int, User*>::iterator it = _users.find(fd);
+    if (it != _users.end()) {
+        delete it->second;
+        _users.erase(it);
+    }
 }
 
 Channel* Server::getChannelByName(const std::string& name) {

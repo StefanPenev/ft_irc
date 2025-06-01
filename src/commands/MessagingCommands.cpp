@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:41:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 01:08:59 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 20:54:14 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
 
         std::ostringstream oss;
         oss << ":" << sender->getPrefix() << " " << (isPrivmsg ? "PRIVMSG" : "NOTICE") << " " << target << " :" << message << "\r\n";
-        channel->broadcast(oss.str(), sender);
+        channel->broadcast(oss.str(), sender, &_server);
     } else {
         User* recipient = _server.getUserByNick(target);
         if (!recipient) {
@@ -72,6 +72,7 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
         std::ostringstream oss;
         oss << ":" << sender->getPrefix() << " " << (isPrivmsg ? "PRIVMSG" : "NOTICE") << " " << recipient->getNickname() << " :" << message << "\r\n";
         recipient->getSendBuffer() += oss.str();
+        _server.flushSendBuffer(recipient->getFd());
     }
 }
 

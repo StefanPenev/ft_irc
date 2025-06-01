@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 01:09:13 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 16:48:18 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,9 @@ private:
     void handlePrivmsg(int fd, const std::vector<std::string>& args);
     void handleNotice(int fd, const std::vector<std::string>& args);
     void handleMessage(int fd, const std::vector<std::string>& args, bool isPrivmsg);
+    void handlePing(int fd, const std::vector<std::string>& args);
+    void handlePong(int fd, const std::vector<std::string>& args);
+    void handleQuit(int fd, const std::vector<std::string>& args);
 };
 
 #endif

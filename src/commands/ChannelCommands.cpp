@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/31 00:17:17 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 20:32:34 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void CommandHandler::handleKick(int fd, const std::vector<std::string>& args) {
 
     // Broadcast KICK message to all channel users (including target)
     std::string kickMsg = ":" + sender->getNickname() + " KICK " + chanName + " " + targetNick + " :" + reason + "\r\n";
-    channel->broadcast(kickMsg);
+    channel->broadcast(kickMsg, NULL, &_server);
 
     // Remove the user from the channel
     channel->removeUser(target);
@@ -174,7 +174,7 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
 
     channel->setTopic(topic);
     std::string msg = ":" + user->getPrefix() + " TOPIC " + chanName + " :" + topic + "\r\n";
-    channel->broadcast(msg);
+    channel->broadcast(msg, NULL, &_server);
 }
 
 //Handle Mode
@@ -310,7 +310,7 @@ void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
             reply += " " + replyParams[i];
         }
         reply += "\r\n";
-        channel->broadcast(reply);
+        channel->broadcast(reply, NULL, &_server);
     }
 }
 
@@ -408,17 +408,18 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
     while (std::getline(ss, chanName, ',')) {
         if (chanName.empty()) continue;
 
-        Channel* channel = _server.getOrCreateChannel(chanName, user);
-        user->getSendBuffer() += ":" + user->getNickname() + " JOIN :" + chanName + "\r\n";
-
         // Check if user is already in the channel
         if (user->isInChannel(chanName)) {
+            ++chanIndex;
             continue;
         }
+
+        Channel* channel = _server.getOrCreateChannel(chanName, user);
 
         // Enforce invite-only mode (+i)
         if (channel->isInviteOnly() && !channel->isInvited(user)) {
             user->getSendBuffer() += ReplyBuilder::build(ERR_INVITEONLYCHAN, *user, chanName);
+            ++chanIndex;
             continue;
         }
 
@@ -431,6 +432,7 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
 
             if (providedKey != channel->getKey()) {
                 user->getSendBuffer() += ReplyBuilder::build(ERR_BADCHANNELKEY, *user, chanName);
+                ++chanIndex;
                 continue;
             }
         }
@@ -438,6 +440,7 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
         // Enforce user limit (+l)
         if (channel->getUserLimit() > 0 && channel->getUserCount() >= channel->getUserLimit()) {
             user->getSendBuffer() += ReplyBuilder::build(ERR_CHANNELISFULL, *user, chanName);
+            ++chanIndex;
             continue;
         }
 
@@ -446,8 +449,7 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
         user->joinChannel(chanName);
         channel->removeInvite(user);
 
-        // Send JOIN message
-        user->getSendBuffer() += ":" + user->getNickname() + " JOIN :" + chanName + "\r\n";
+        user->getSendBuffer() += ":" + user->getPrefix() + " JOIN :" + chanName + "\r\n";
 
         ++chanIndex;
     }

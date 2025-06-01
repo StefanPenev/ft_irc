@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+         #
+#    By: stefan <stefan@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/15 13:03:18 by anilchen          #+#    #+#              #
-#    Updated: 2025/05/30 13:15:07 by anilchen         ###   ########.fr        #
+#    Updated: 2025/06/01 16:40:49 by stefan           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ SRC += $(SRC_DIR)/User.cpp \
 
 		
 SRC += $(SRC_DIR)/commands/AuthCommands.cpp \
+		$(SRC_DIR)/commands/ServerCommands.cpp \
 		$(SRC_DIR)/commands/CommandHandler.cpp \
 		$(SRC_DIR)/commands/ChannelCommands.cpp \
 		$(SRC_DIR)/commands/MessagingCommands.cpp \

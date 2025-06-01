@@ -6,12 +6,14 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:28:55 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 19:51:27 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/01 19:50:04 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
+
+class Server;
 
 #include <string>
 #include <map>
@@ -71,7 +73,7 @@ public:
     const std::string& getTopic() const;
     bool hasTopic() const;
 
-    void broadcast(const std::string& message, User* except = NULL);
+    void broadcast(const std::string& message, User* except = NULL, Server* server = NULL);
 };
 
 #endif
