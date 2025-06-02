@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 20:32:34 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 18:50:09 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ void CommandHandler::handleInvite(int fd, const std::vector<std::string>& args) 
 
     // Send RPL_INVITING to inviter
     user->getSendBuffer() += ReplyBuilder::build(RPL_INVITING, *user, targetNick, channelName);
-
+    
     // Notify invited user
     std::string inviteMsg = ":" + user->getPrefix() + " INVITE " + targetNick + " :" + channelName + "\r\n";
     targetUser->getSendBuffer() += inviteMsg;
