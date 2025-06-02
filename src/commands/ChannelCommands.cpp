@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 20:51:15 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:53:25 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,6 +292,7 @@ void CommandHandler::handleMode(int fd, const std::vector<std::string>& args) {
                             continue;
                         }
                         channel->setOperatorStatus(targetUser, adding);
+                        targetUser->setChannelOperator(target, adding);
                         replyModes += "o";
                         replyParams.push_back(nick);
                     }
@@ -447,6 +448,8 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
         // Passed all checks — join
         channel->addUser(user);
         user->joinChannel(chanName);
+        if (channel->getUserCount() == 1)
+            user->setChannelOperator(chanName, true);
         channel->removeInvite(user);
 
         std::string joinMsg = ":" + user->getPrefix() + " JOIN :" + chanName + "\r\n";
@@ -459,6 +462,8 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
         for (std::set<User*>::const_iterator it = members.begin(); it != members.end(); ++it) {
             if (!namesList.empty())
                 namesList += " ";
+            if ((*it)->isChannelOperator(chanName))
+                namesList += "@";
             namesList += (*it)->getNickname();
         }
         

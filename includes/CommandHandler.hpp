@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:28 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 16:48:18 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:25:45 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ private:
     void handlePing(int fd, const std::vector<std::string>& args);
     void handlePong(int fd, const std::vector<std::string>& args);
     void handleQuit(int fd, const std::vector<std::string>& args);
+    void handleNames(int fd, const std::vector<std::string>& args);
 };
 
 #endif

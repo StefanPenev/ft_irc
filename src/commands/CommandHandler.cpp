@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 15:45:25 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 16:31:22 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:25:19 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ CommandHandler::CommandHandler(Server& server, const std::string& serverPassword
     _handlers["PING"] = &CommandHandler::handlePing;
     _handlers["PONG"] = &CommandHandler::handlePong;
     _handlers["QUIT"] = &CommandHandler::handleQuit;
+    _handlers["NAMES"] = &CommandHandler::handleNames;
 }
 
 void CommandHandler::handleCommand(int fd, const std::string& line) {

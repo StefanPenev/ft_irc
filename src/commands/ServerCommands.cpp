@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 20:55:05 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:26:33 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,44 @@ void CommandHandler::handleQuit(int fd, const std::vector<std::string>& args) {
     }
 
     user->markForDisconnect();
+}
+
+void CommandHandler::handleNames(int fd, const std::vector<std::string>& args) {
+    User* user = _server.getUserByFd(fd);
+    if (!user)
+        return;
+
+    // If no channel is specified, list all visible channels (optional, here we require a channel)
+    if (args.empty() || args[0].empty()) {
+        user->getSendBuffer() += ":ircserv 366 " + user->getNickname() + " * :End of /NAMES list\r\n";
+        _server.flushSendBuffer(fd);
+        return;
+    }
+
+    std::string chanName = args[0];
+    Channel* channel = _server.getChannelByName(chanName);
+    if (!channel) {
+        user->getSendBuffer() += ":ircserv 366 " + user->getNickname() + " " + chanName + " :End of /NAMES list\r\n";
+        _server.flushSendBuffer(fd);
+        return;
+    }
+
+    // Build the names list with @ for ops
+    std::string namesList;
+    const std::set<User*>& members = channel->getUsers();
+    for (std::set<User*>::const_iterator it = members.begin(); it != members.end(); ++it) {
+        if (!namesList.empty())
+            namesList += " ";
+        if ((*it)->isChannelOperator(chanName))
+            namesList += "@";
+        namesList += (*it)->getNickname();
+    }
+
+    // Send RPL_NAMREPLY (353)
+    user->getSendBuffer() +=
+        ":ircserv 353 " + user->getNickname() + " = " + chanName + " :" + namesList + "\r\n";
+    // Send RPL_ENDOFNAMES (366)
+    user->getSendBuffer() +=
+        ":ircserv 366 " + user->getNickname() + " " + chanName + " :End of /NAMES list\r\n";
+    _server.flushSendBuffer(fd);
 }
