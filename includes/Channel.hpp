@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:28:55 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 19:50:04 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:00:38 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ public:
     void addUser(User* user);
     void removeUser(User* user);
     bool isMember(User* user) const;
-
+    const std::set<User*>& getUsers() const;
     int getUserCount() const;
 
     void inviteUser(User* user);

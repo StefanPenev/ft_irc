@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 23:52:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 18:50:58 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 20:59:51 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,9 @@ public:
     void leaveChannel(const std::string& name);
     bool isInChannel(const std::string& name) const;
 
+    void markForDisconnect();
+    bool isMarkedForDisconnect() const;
+
     std::string getPrefix() const;
 
 private:
@@ -67,7 +70,7 @@ private:
     std::string _hostname;
     bool _isOperator;
     State _state;
-
+    bool _markedForDisconnect;
     std::set<std::string> _channels;
 
     std::string _recvBuffer;

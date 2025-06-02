@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 18:50:09 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 20:51:15 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,7 +449,27 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
         user->joinChannel(chanName);
         channel->removeInvite(user);
 
-        user->getSendBuffer() += ":" + user->getPrefix() + " JOIN :" + chanName + "\r\n";
+        std::string joinMsg = ":" + user->getPrefix() + " JOIN :" + chanName + "\r\n";
+        user->getSendBuffer() += joinMsg;
+        channel->broadcast(joinMsg, user, &_server);
+        
+        // Build the NAMES list
+        std::string namesList;
+        const std::set<User*>& members = channel->getUsers();
+        for (std::set<User*>::const_iterator it = members.begin(); it != members.end(); ++it) {
+            if (!namesList.empty())
+                namesList += " ";
+            namesList += (*it)->getNickname();
+        }
+        
+        user->getSendBuffer() +=
+            ":ircserv 353 " + user->getNickname() + " = " + chanName + " :" + namesList + "\r\n";
+
+
+        user->getSendBuffer() +=
+            ":ircserv 366 " + user->getNickname() + " " + chanName + " :End of /NAMES list\r\n";
+
+        _server.flushSendBuffer(fd);
 
         ++chanIndex;
     }

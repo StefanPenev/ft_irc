@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/02 14:21:52 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/02 21:05:07 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,96 +184,45 @@ void Server::handleNewConnection()
 
 void Server::handleClientMessage(int clientFd)
 {
-	int		bytesRead;
-	size_t	pos;
+    int bytesRead;
+    std::string buf(1024, '\0');
+    bytesRead = recv(clientFd, &buf[0], 1024, 0);
 
-	std::string buf(1024, '\0');
-	bytesRead = recv(clientFd, &buf[0], 1024, 0);
-	if (bytesRead <= 0)
-	{
-		std::cerr << "[WARNING] Client " << clientFd << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
-		// Instead of manual close/delete, call unified removal
-		removeUserByFd(clientFd);
-		return ;
-	}
-	std::string &buffer = _users[clientFd]->getRecvBuffer();
-	buffer.append(buf, 0, bytesRead);
-	// Process commands ending with "\r\n"
-	while ((pos = buffer.find("\r\n")) != std::string::npos)
-	{
-		std::string line = buffer.substr(0, pos);
-		buffer.erase(0, pos + 2);
-		try
-		{
-			_commandHandler->handleCommand(clientFd, line);
-		}
-		catch (const std::exception &ex)
-		{
-			std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
-		}
-		catch (...)
-		{
-			std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
-		}
-		// *Check if the user still exists before flushing:*
-		if (getUserByFd(clientFd))
-		{
-			flushSendBuffer(clientFd);
-		}
-		else
-		{
-			// The user was removed (QUIT or forcibly), so stop
-			break ;
-		}
-	}
+    if (bytesRead <= 0)
+    {
+        std::cerr << "[WARNING] Client " << clientFd
+                  << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
+        removeUserByFd(clientFd);
+        return;
+    }
+
+    std::string &buffer = _users[clientFd]->getRecvBuffer();
+    buffer.append(buf, 0, bytesRead);
+
+    size_t pos;
+    while ((pos = buffer.find("\r\n")) != std::string::npos)
+    {
+        std::string line = buffer.substr(0, pos);
+        buffer.erase(0, pos + 2);
+
+        try {
+            _commandHandler->handleCommand(clientFd, line);
+        } catch (const std::exception &ex) {
+            std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
+        } catch (...) {
+            std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
+        }
+
+        if (getUserByFd(clientFd))
+        {
+            flushSendBuffer(clientFd);
+        }
+        else
+        {
+            break;
+        }
+    }
 }
-
-// void Server::handleClientMessage(int clientFd)
-// {
-// 	size_t	pos;
-// 	int		bytesRead;
-
-// 	std::string buf(1024, '\0');
-// 	bytesRead = recv(clientFd, &buf[0], 1024, 0);
-// 	// int recv(int sockfd, void *buf, int len, int flags);
-// 	// sockfd is the socket descriptor to read from,
-// 	// buf is the buffer to read from,
-// 	// len is the maximum length of the buffer,
-// 	// flags can again be set to 0 (see the recv() man page.)
-// 	if (bytesRead <= 0)
-// 	{
-// 		std::cerr << "[WARNING] Client " << clientFd << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
-// 		close(clientFd);
-// 		_pollManager.removeFd(clientFd);
-// 		delete (_users[clientFd]);
-// 		_users.erase(clientFd);
-// 		//recvBuffers.erase(clientFd);
-// 		return ;
-// 	}
-// 	//std::string &buffer = recvBuffers[clientFd];
-// 	std::string &buffer = _users[clientFd]->getRecvBuffer();
-// 	buffer.append(buf, 0, bytesRead);
-// 	// CHAINING POINT: Check for complete command line (IRC commands end with \r\n)
-// 	while ((pos = buffer.find("\r\n")) != std::string::npos)
-// 	{
-// 		std::string line = buffer.substr(0, pos);
-// 		buffer.erase(0, pos + 2);
-// 		// CHAINING POINT: Call to Team B's command processing logic
-// 		try
-// 		{
-// 			_commandHandler->handleCommand(clientFd, line);
-// 		}
-// 		catch (const std::exception &ex)
-// 		{
-// 			std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
-// 		}
-// 		catch (...)
-// 		{
-// 			std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
-// 		}
-// 		flushSendBuffer(clientFd);
-// 	}
-// }
 
 void Server::run()
 {

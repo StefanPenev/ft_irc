@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 20:33:08 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 20:55:05 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ void CommandHandler::handleQuit(int fd, const std::vector<std::string>& args) {
     User* user = _server.getUserByFd(fd);
     if (!user)
         return;
+
     std::string reason = "Client Quit";
     if (!args.empty()) {
         reason = args[0];
@@ -53,8 +54,10 @@ void CommandHandler::handleQuit(int fd, const std::vector<std::string>& args) {
     }
 
     std::string quitMsg = ":" + user->getPrefix() + " QUIT :" + reason + "\r\n";
-    const std::set<std::string>& userChannelNames = user->getChannels();
-    std::vector<std::string> channelsToPart(userChannelNames.begin(), userChannelNames.end());
+
+    const std::set<std::string>& channelNames = user->getChannels();
+    std::vector<std::string> channelsToPart(channelNames.begin(), channelNames.end());
+
     for (size_t i = 0; i < channelsToPart.size(); ++i) {
         Channel* chan = _server.getChannelByName(channelsToPart[i]);
         if (chan) {
@@ -63,5 +66,5 @@ void CommandHandler::handleQuit(int fd, const std::vector<std::string>& args) {
         }
     }
 
-    _server.removeUserByFd(fd);
+    user->markForDisconnect();
 }

@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:29:52 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 21:07:12 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:01:37 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,10 @@ const std::string& Channel::getTopic() const {
 
 bool Channel::hasTopic() const {
     return !_topic.empty();
+}
+
+const std::set<User*>& Channel::getUsers() const {
+    return _members;
 }
 
 void Channel::broadcast(const std::string& message, User* except, Server* server) {

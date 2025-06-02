@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 23:51:59 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 15:36:39 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/02 21:16:09 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "User.hpp"
 
 User::User(int fd)
-    : _fd(fd), _isOperator(false), _state(CONNECTED) {}
+    : _fd(fd), _isOperator(false), _state(CONNECTED), _markedForDisconnect(false) {}
 
 User::~User() {}
 
@@ -68,6 +68,13 @@ std::string User::getPrefix() const {
     return _nickname + "!" + _username + "@" + _hostname;
 }
 
+void User::markForDisconnect() {
+    _markedForDisconnect = true;
+}
+
+bool User::isMarkedForDisconnect() const {
+    return _markedForDisconnect;
+}
 
 void User::SetRecvBuffer(const std::string &msg) //anna
 {

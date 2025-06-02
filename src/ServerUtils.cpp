@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 01:12:14 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/01 21:09:03 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 21:02:38 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,22 @@ User* Server::getUserByFd(int fd) {
 }
 
 void Server::removeUserByFd(int fd) {
-    _pollManager.removeFd(fd);
-    
-    flushSendBuffer(fd);
-    close(fd);
-    
-    std::map<int, User*>::iterator it = _users.find(fd);
-    if (it != _users.end()) {
-        delete it->second;
-        _users.erase(it);
-    }
+	std::map<int, User*>::iterator it = _users.find(fd);
+	if (it == _users.end())
+		return;
+
+	User* user = it->second;
+	const std::set<std::string>& channels = user->getChannels();
+	for (std::set<std::string>::const_iterator ch = channels.begin(); ch != channels.end(); ++ch) {
+		Channel* channel = getChannelByName(*ch);
+		if (channel) {
+			channel->removeUser(user);
+		}
+	}
+	_pollManager.removeFd(fd);
+	close(fd);
+	delete user;
+	_users.erase(it);
 }
 
 Channel* Server::getChannelByName(const std::string& name) {
