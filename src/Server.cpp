@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/01 21:08:38 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 14:21:52 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Channel.hpp"
 #include "CommandHandler.hpp"
 #include "PollManager.hpp"
+#include "ReplyBuilder.hpp"
 #include "Server.hpp"
+#include "User.hpp"
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -24,8 +28,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "Channel.hpp"
-#include "User.hpp"
 
 struct addrinfo *Server::resolveAddress(const std::string &portStr)
 {
@@ -63,7 +65,7 @@ int Server::createSocket(struct addrinfo *res)
 	// create a socket based on what getaddrinfo returned
 	if (sockfd == -1)
 	{
-		perror("socket");
+		perror("[ERROR]: socket()");
 		freeaddrinfo(res);
 		exit(1);
 	}
@@ -91,7 +93,7 @@ void Server::bindSocket(int sockfd, struct addrinfo *res)
 {
 	if (bind(sockfd, res->ai_addr, res->ai_addrlen) != 0)
 	{
-		perror("bind");
+		perror("[ERROR]: bind()");
 		freeaddrinfo(res);
 		close(sockfd);
 		exit(1);
@@ -103,7 +105,7 @@ void Server::startListening(int sockfd)
 {
 	if (listen(sockfd, SOMAXCONN) != 0)
 	{
-		perror("listen");
+		perror("[ERROR]: listen()");
 		close(sockfd);
 		exit(1);
 	}
@@ -167,7 +169,6 @@ void Server::handleNewConnection()
 	// accept() will not write more bytes to addr than specified. If it writes fewer than specified,
 	// it will change the value of addrlen.
 	std::cout << "[SERVER] New connection accepted. FD = " << clientid << std::endl;
-	// CHAINING POINT: User object is created as soon as a new client connects
 	if (_users.find(clientid) == _users.end())
 	{
 		newUser = new User(clientid);
@@ -183,45 +184,48 @@ void Server::handleNewConnection()
 
 void Server::handleClientMessage(int clientFd)
 {
-    int bytesRead;
-    std::string buf(1024, '\0');
-    bytesRead = recv(clientFd, &buf[0], 1024, 0);
+	int		bytesRead;
+	size_t	pos;
 
-    if (bytesRead <= 0)
-    {
-        std::cerr << "[WARNING] Client " << clientFd
-                  << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
-        // Instead of manual close/delete, call unified removal
-        removeUserByFd(clientFd);
-        return;
-    }
-
-    std::string &buffer = _users[clientFd]->getRecvBuffer();
-    buffer.append(buf, 0, bytesRead);
-
-    // Process commands ending with "\r\n"
-    size_t pos;
-    while ((pos = buffer.find("\r\n")) != std::string::npos)
-    {
-        std::string line = buffer.substr(0, pos);
-        buffer.erase(0, pos + 2);
-
-        try {
-            _commandHandler->handleCommand(clientFd, line);
-        } catch (const std::exception &ex) {
-            std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
-        } catch (...) {
-            std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
-        }
-
-        // *Check if the user still exists before flushing:*
-        if (getUserByFd(clientFd)) {
-            flushSendBuffer(clientFd);
-        } else {
-            // The user was removed (QUIT or forcibly), so stop
-            break;
-        }
-    }
+	std::string buf(1024, '\0');
+	bytesRead = recv(clientFd, &buf[0], 1024, 0);
+	if (bytesRead <= 0)
+	{
+		std::cerr << "[WARNING] Client " << clientFd << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
+		// Instead of manual close/delete, call unified removal
+		removeUserByFd(clientFd);
+		return ;
+	}
+	std::string &buffer = _users[clientFd]->getRecvBuffer();
+	buffer.append(buf, 0, bytesRead);
+	// Process commands ending with "\r\n"
+	while ((pos = buffer.find("\r\n")) != std::string::npos)
+	{
+		std::string line = buffer.substr(0, pos);
+		buffer.erase(0, pos + 2);
+		try
+		{
+			_commandHandler->handleCommand(clientFd, line);
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
+		}
+		catch (...)
+		{
+			std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
+		}
+		// *Check if the user still exists before flushing:*
+		if (getUserByFd(clientFd))
+		{
+			flushSendBuffer(clientFd);
+		}
+		else
+		{
+			// The user was removed (QUIT or forcibly), so stop
+			break ;
+		}
+	}
 }
 
 // void Server::handleClientMessage(int clientFd)
@@ -247,7 +251,7 @@ void Server::handleClientMessage(int clientFd)
 // 		return ;
 // 	}
 // 	//std::string &buffer = recvBuffers[clientFd];
-// 	std::string &buffer = _users[clientFd]->getRecvBuffer(); 
+// 	std::string &buffer = _users[clientFd]->getRecvBuffer();
 // 	buffer.append(buf, 0, bytesRead);
 // 	// CHAINING POINT: Check for complete command line (IRC commands end with \r\n)
 // 	while ((pos = buffer.find("\r\n")) != std::string::npos)
@@ -276,7 +280,7 @@ void Server::run()
 	int	numReady;
 	int	handled;
 
-	//std::map<int, std::string> recvBuffers;
+	// std::map<int, std::string> recvBuffers;
 	std::cout << "[SERVER] Running and listening on port " << _port << std::endl;
 	std::cout << "[SERVER] Waiting for new client connection..." << std::endl;
 	while (true)
@@ -289,7 +293,7 @@ void Server::run()
 		}
 		if (numReady == 0)
 		{
-			continue;
+			continue ;
 		}
 		std::vector<pollfd> &fds = _pollManager.getFds();
 		for (size_t i = 0; i < fds.size() && handled < numReady; i++)

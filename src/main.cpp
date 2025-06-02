@@ -3,21 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:54:43 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/31 00:45:43 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 13:43:56 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ReplyBuilder.hpp"
 #include "Server.hpp"
 #include <cctype>
+#include <csignal>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 
 // hexchat
+
+bool Server::running = true;
+
+void	handleSigint(int sig)
+{
+	(void)sig;
+	Server::running = false;
+}
 
 int	main(int argc, char const **argv)
 {
@@ -44,6 +53,14 @@ int	main(int argc, char const **argv)
 	}
 	ReplyBuilder::init("ircserv");
 	Server serv(port, argv[2]);
-	serv.run();
+	std::signal(SIGINT, handleSigint);
+	try
+	{
+		serv.run();
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << "Exception caught: " << e.what() << '\n';
+	}
 	return (0);
 }

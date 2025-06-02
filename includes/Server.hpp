@@ -3,22 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:28:46 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/01 21:06:17 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/02 14:21:35 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <string>
 # include "Channel.hpp"
 # include "CommandHandler.hpp"
 # include "PollManager.hpp"
 # include "User.hpp"
 # include <map>
+# include <string>
 
 class Server
 {
@@ -41,6 +41,8 @@ class Server
 	CommandHandler *_commandHandler;
 
   public:
+	static bool running;
+
 	Server();
 	Server(int port, const std::string &password);
 	~Server();

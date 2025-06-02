@@ -6,7 +6,7 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 13:12:22 by anilchen          #+#    #+#             */
-/*   Updated: 2025/05/30 16:49:07 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/02 13:42:34 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+#include <cerrno>
 
 PollManager::PollManager() : _pollFds()
 {
@@ -58,6 +59,12 @@ int PollManager::wait(void)
 	int	numReady;
 
 	numReady = poll(_pollFds.data(), _pollFds.size(), -1);
+	if (numReady == -1)
+	{
+		if (errno == EINTR)
+			return -1;
+		throw std::runtime_error("poll() failed");
+	}
 	return (numReady);
 	// int poll (struct pollfd *__fds, nfds_t __nfds, int __timeout)
 	// _pollFds.data() - pointer to first pollfd in vector
