@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/02 21:05:07 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/09 21:31:16 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,6 +270,8 @@ Server::Server(int port, const std::string &password) : _port(port),
 
 Server::~Server()
 {
+	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+        delete it->second;
 	delete this->_commandHandler;
 	std::cout << "DEBUG: Server is destroyed"
 				<< "\n";
