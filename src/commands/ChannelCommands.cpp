@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 21:53:25 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/09 12:59:18 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -409,6 +409,12 @@ void CommandHandler::handleJoin(int fd, const std::vector<std::string>& args) {
     while (std::getline(ss, chanName, ',')) {
         if (chanName.empty()) continue;
 
+        if (chanName[0] != '#' && chanName[0] != '&') {
+            user->getSendBuffer() += ReplyBuilder::build(ERR_BADCHANMASK, *user, chanName, "");
+            ++chanIndex;
+            continue;
+        }
+        
         // Check if user is already in the channel
         if (user->isInChannel(chanName)) {
             ++chanIndex;

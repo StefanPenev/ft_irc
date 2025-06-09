@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:54:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/28 22:33:40 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/09 12:54:10 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ enum ReplyCode {
     ERR_UNKNOWNMODE = 472,
     ERR_CHANOPRIVSNEEDED = 482,
     ERR_CANNOTSENDTOCHAN = 404,
+    ERR_BADCHANMASK = 476,
 
     ERR_INVITEONLYCHAN = 473,
     ERR_BADCHANNELKEY = 475,

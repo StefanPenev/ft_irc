@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 13:55:01 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 18:49:19 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/09 12:56:26 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void ReplyBuilder::init(const std::string &serverName)
 	_templates[ERR_USERONCHANNEL] = ":<server> 443 <nick> <arg> :is already on channel";
 	_templates[ERR_NOSUCHNICK] = ":<server> 401 <nick> <arg> :No such nick/channel";
 	_templates[ERR_CANNOTSENDTOCHAN] = ":<server> 404 <nick> <arg> :<msg>";
+	_templates[ERR_BADCHANMASK] = ":<server> 476 <nick> <arg> :Invalid channel name";
 }
 
 std::string ReplyBuilder::build(int code, const User &user,
