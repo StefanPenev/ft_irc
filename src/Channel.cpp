@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 10:29:52 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/02 21:01:37 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/10 14:02:33 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,16 @@ bool Channel::isTopicLocked() const {
 }
 
 void Channel::setKey(const std::string& key) {
-    _key = key;
-    _hasKey = true;
+    if (key.empty())
+    {
+        _key.clear();
+        _hasKey = false;
+    }
+    else
+    {
+        _key = key;
+        _hasKey = true;
+    }
 }
 
 void Channel::clearKey() {
