@@ -6,7 +6,7 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/10 16:19:47 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/12 16:05:01 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,8 +187,8 @@ void Server::CreateBot()
 {
 	Bot	*bot;
 
-	bot = new Bot(-1, "Bot");
-	_users[-1] = bot;
+	bot = new Bot(BOT_FD, "Bot");
+	_users[BOT_FD] = bot;
 	std::cout << "[BOT]: Bot created\n";
 }
 
