@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+         #
+#    By: stefan <stefan@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/15 13:03:18 by anilchen          #+#    #+#              #
-#    Updated: 2025/06/10 16:45:11 by anilchen         ###   ########.fr        #
+#    Updated: 2025/06/12 13:34:56 by stefan           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,9 @@ SRC_BONUS_DIR   = src_bonus
 
 OBJ_DIR = obj
 OBJ_BONUS_DIR   = obj_bonus
+
+BOT_SRC = bonus/weatherbot.cpp
+BOT_BIN = bonus/weatherbot
 
 # **************************************************************************** #
 #                                mandatory                                     #
@@ -92,11 +95,17 @@ $(OBJ_BONUS_DIR)/%.o: $(SRC_BONUS_DIR)/%.cpp
 #$(OBJ_DIR):
 #	mkdir -p $(OBJ_DIR)
 
+bot: $(BOT_BIN)
+
+$(BOT_BIN): $(BOT_SRC)
+	$(CC) $(CFLAGS) -o $(BOT_BIN) $(BOT_SRC)
+
 clean:
 	rm -rf $(OBJ_DIR) $(OBJ_BONUS_DIR)
 
 fclean: clean
 	rm -f $(NAME) $(NAME_BONUS)
+	rm -f $(BOT_BIN)
 
 re: fclean all
 
