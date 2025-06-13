@@ -6,21 +6,22 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/12 16:05:01 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/13 20:05:29 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Bot.hpp"
 #include "Channel_bonus.hpp"
 #include "CommandHandler_bonus.hpp"
 #include "PollManager_bonus.hpp"
 #include "ReplyBuilder_bonus.hpp"
 #include "Server_bonus.hpp"
 #include "User_bonus.hpp"
-#include "Bot.hpp"
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <netdb.h>
 #include <poll.h>
@@ -144,6 +145,32 @@ int Server::setupSocket()
 	return (sockfd);
 }
 
+void Server::CreateBot()
+{
+	int	sockfd;
+	Bot	*bot;
+
+	// Create a temporary bot instance just to access connectToHost()
+	bot = new Bot(-1, "Bot");
+	sockfd = bot->connectToHost(IRC_SERVER, this->_port);
+	if (sockfd < 0)
+	{
+		std::cerr << "[BOT]: Failed to connect to IRC server\n";
+		delete bot; // Clean up temporary bot
+		return ;
+	}
+	delete bot; // Remove the temporary bot
+	// Set the socket to non-blocking mode
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	// Create a bot instance with the actual socket file descriptor
+	bot = new Bot(sockfd, "Bot");
+	// Add bot to the users map using its socket fd as key
+	_users[sockfd] = bot;
+	// // Assign the socket fd to the bot explicitly
+	// bot->setFd(sockfd);
+	std::cout << "[BOT]: Bot created and connected with fd = " << sockfd << "\n";
+}
+
 void Server::handleNewConnection()
 {
 	int						clientid;
@@ -181,15 +208,6 @@ void Server::handleNewConnection()
 	}
 	newUser->SetRecvBuffer("");
 	_pollManager.addFd(clientid);
-}
-
-void Server::CreateBot()
-{
-	Bot	*bot;
-
-	bot = new Bot(BOT_FD, "Bot");
-	_users[BOT_FD] = bot;
-	std::cout << "[BOT]: Bot created\n";
 }
 
 void Server::handleClientMessage(int clientFd)
@@ -239,7 +257,6 @@ void Server::run()
 	int	numReady;
 	int	handled;
 
-	// std::map<int, std::string> recvBuffers;
 	std::cout << "[SERVER] Running and listening on port " << _port << std::endl;
 	std::cout << "[SERVER] Waiting for new client connection..." << std::endl;
 	CreateBot();
@@ -282,7 +299,10 @@ Server::Server(int port, const std::string &password) : _port(port),
 Server::~Server()
 {
 	for (std::map<std::string,
-		Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+		Channel *>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		delete it->second;
+	for (std::map<int,
+		User *>::iterator it = _users.begin(); it != _users.end(); it++)
 		delete it->second;
 	delete this->_commandHandler;
 	std::cout << "DEBUG: Server is destroyed\n";

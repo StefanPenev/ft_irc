@@ -6,7 +6,7 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:41:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/12 16:32:22 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/13 18:36:14 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,22 +45,18 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
             message += args[i];
         }
     }
-    //bot
-    if (target == "Bot")
-    {
-	    User *botUser = _server.getUserByNick("Bot");
-	    if (botUser)
-	    {
-		    Bot *bot = static_cast<Bot *>(botUser);
-		    std::string response = bot->handleMessage(message);
-		    std::ostringstream oss;
-		    oss << ":" << bot->getPrefix() << " PRIVMSG " << sender->getNickname() << " :" << response << "\r\n";
-		    sender->getSendBuffer() += oss.str();
-	    	_server.flushSendBuffer(sender->getFd());
-    	}
-	    return;
+    if (target == "Bot") {
+        User* botUser = _server.getUserByNick("Bot");
+        if (botUser) {
+            Bot* bot = static_cast<Bot*>(botUser);
+            std::string response = bot->handleMessage(message);
+            std::ostringstream ossBotResp;
+            ossBotResp << ":" << bot->getPrefix() << " PRIVMSG " << sender->getNickname() << " :" << response << "\r\n";
+            sender->getSendBuffer() += ossBotResp.str();
+            _server.flushSendBuffer(sender->getFd());
+        }
+        return;
     }
-    //end
     if (target[0] == '#') {
         Channel* channel = _server.getChannelByName(target);
         if (!channel) {
@@ -89,12 +85,6 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
         oss << ":" << sender->getPrefix() << " " << (isPrivmsg ? "PRIVMSG" : "NOTICE") << " " << recipient->getNickname() << " :" << message << "\r\n";
         recipient->getSendBuffer() += oss.str();
         _server.flushSendBuffer(recipient->getFd());
-        //notice privat chat
-        if (recipient != sender) 
-        {
-	        sender->getSendBuffer() += oss.str();
-	        _server.flushSendBuffer(sender->getFd());
-        }
     }
 }
 

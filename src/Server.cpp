@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 12:15:14 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/09 21:31:16 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/13 14:49:55 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,44 +184,44 @@ void Server::handleNewConnection()
 
 void Server::handleClientMessage(int clientFd)
 {
-    int bytesRead;
-    std::string buf(1024, '\0');
-    bytesRead = recv(clientFd, &buf[0], 1024, 0);
+	int		bytesRead;
+	size_t	pos;
 
-    if (bytesRead <= 0)
-    {
-        std::cerr << "[WARNING] Client " << clientFd
-                  << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
-        removeUserByFd(clientFd);
-        return;
-    }
-
-    std::string &buffer = _users[clientFd]->getRecvBuffer();
-    buffer.append(buf, 0, bytesRead);
-
-    size_t pos;
-    while ((pos = buffer.find("\r\n")) != std::string::npos)
-    {
-        std::string line = buffer.substr(0, pos);
-        buffer.erase(0, pos + 2);
-
-        try {
-            _commandHandler->handleCommand(clientFd, line);
-        } catch (const std::exception &ex) {
-            std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
-        } catch (...) {
-            std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
-        }
-
-        if (getUserByFd(clientFd))
-        {
-            flushSendBuffer(clientFd);
-        }
-        else
-        {
-            break;
-        }
-    }
+	std::string buf(1024, '\0');
+	bytesRead = recv(clientFd, &buf[0], 1024, 0);
+	if (bytesRead <= 0)
+	{
+		std::cerr << "[WARNING] Client " << clientFd << " disconnected or recv failed. bytesRead=" << bytesRead << std::endl;
+		removeUserByFd(clientFd);
+		return ;
+	}
+	std::string &buffer = _users[clientFd]->getRecvBuffer();
+	buffer.append(buf, 0, bytesRead);
+	while ((pos = buffer.find("\r\n")) != std::string::npos)
+	{
+		std::string line = buffer.substr(0, pos);
+		buffer.erase(0, pos + 2);
+		try
+		{
+			_commandHandler->handleCommand(clientFd, line);
+		}
+		catch (const std::exception &ex)
+		{
+			std::cerr << "[ERROR] Exception in handleCommand: " << ex.what() << std::endl;
+		}
+		catch (...)
+		{
+			std::cerr << "[ERROR] Unknown error in handleCommand" << std::endl;
+		}
+		if (getUserByFd(clientFd))
+		{
+			flushSendBuffer(clientFd);
+		}
+		else
+		{
+			break ;
+		}
+	}
 }
 
 void Server::run()
@@ -270,9 +270,9 @@ Server::Server(int port, const std::string &password) : _port(port),
 
 Server::~Server()
 {
-	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	for (std::map<std::string,
+	Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
         delete it->second;
 	delete this->_commandHandler;
-	std::cout << "DEBUG: Server is destroyed"
-				<< "\n";
+	std::cout << "DEBUG: Server is destroyed\n";
 }

@@ -6,7 +6,7 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:41:13 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/12 15:49:17 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/13 18:47:19 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,12 +73,6 @@ void CommandHandler::handleMessage(int fd, const std::vector<std::string>& args,
         oss << ":" << sender->getPrefix() << " " << (isPrivmsg ? "PRIVMSG" : "NOTICE") << " " << recipient->getNickname() << " :" << message << "\r\n";
         recipient->getSendBuffer() += oss.str();
         _server.flushSendBuffer(recipient->getFd());
-        //new added
-        if (recipient != sender) 
-        {
-	        sender->getSendBuffer() += oss.str();
-	        _server.flushSendBuffer(sender->getFd());
-        }
     }
 }
 

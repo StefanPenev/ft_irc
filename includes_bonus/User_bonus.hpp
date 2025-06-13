@@ -6,7 +6,7 @@
 /*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/22 23:52:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/10 16:40:39 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/13 19:11:41 by anilchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,7 @@ protected:
 
     std::string _recvBuffer;
     std::string _sendBuffer;
-    std::map<std::string, bool> _channelOps;
-    //std::map<int, std::string> recvBuffers; //anna
-    
+    std::map<std::string, bool> _channelOps;   
 };
 
 #endif
