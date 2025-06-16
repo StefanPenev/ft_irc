@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:30 by stefan            #+#    #+#             */
-/*   Updated: 2025/06/09 14:15:37 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/14 23:56:37 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
         return;
     }
 
-    // --- Topic query ---
+    // Topic query
     if (args.size() == 1) {
         if (channel->hasTopic()) {
             user->getSendBuffer() += ReplyBuilder::build(RPL_TOPIC, *user, chanName, channel->getTopic());
@@ -158,7 +158,7 @@ void CommandHandler::handleTopic(int fd, const std::vector<std::string>& args) {
         return;
     }
 
-    // --- Topic setting ---
+    // Topic setting
     if (channel->isTopicLocked() && !channel->isOperator(user)) {
         user->getSendBuffer() += ReplyBuilder::build(ERR_CHANOPRIVSNEEDED, *user, chanName);
         return;

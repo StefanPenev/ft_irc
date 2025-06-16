@@ -5,110 +5,102 @@
 #                                                     +:+ +:+         +:+      #
 #    By: stefan <stefan@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/05/15 13:03:18 by anilchen          #+#    #+#              #
-#    Updated: 2025/06/12 13:34:56 by stefan           ###   ########.fr        #
+#    Created: 2025/06/14 21:49:31 by stefan            #+#    #+#              #
+#    Updated: 2025/06/14 21:53:27 by stefan           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = ircserv
-NAME_BONUS = ircserv_bonus
+# ============================================================================ #
+#                                CONFIGURATION								   #
+# ============================================================================ #
+NAME            = ircserv
+NAME_BONUS      = ircserv_bonus
+BOT_BIN         = weatherbot
 
-CC     = c++
-CFLAGS = -Wall -Wextra -Werror -I./includes -std=c++98
-CFLAGS_BONUS = -Wall -Wextra -Werror -I./includes_bonus -std=c++98
+CC              = c++
+CFLAGS          = -Wall -Wextra -Werror -std=c++98
+INCLUDES        = -I./includes
+CPPFLAGS        = -MMD -MP $(INCLUDES)
 
-SRC_DIR = src
-SRC_BONUS_DIR   = src_bonus
+SRC_DIR         = src
+OBJ_DIR         = obj
 
-OBJ_DIR = obj
-OBJ_BONUS_DIR   = obj_bonus
+BOT_SRC_DIR     = bonus
+BOT_OBJ_DIR     = obj_bonus
 
-BOT_SRC = bonus/weatherbot.cpp
-BOT_BIN = bonus/weatherbot
+# ============================================================================ #
+#                              SOURCE FILES									   #
+# ============================================================================ #
 
-# **************************************************************************** #
-#                                mandatory                                     #
-# **************************************************************************** #
+SRC = \
+	$(SRC_DIR)/main.cpp \
+	$(SRC_DIR)/User.cpp \
+	$(SRC_DIR)/Server.cpp \
+	$(SRC_DIR)/Channel.cpp \
+	$(SRC_DIR)/ServerUtils.cpp \
+	$(SRC_DIR)/PollManager.cpp \
+	$(SRC_DIR)/commands/AuthCommands.cpp \
+	$(SRC_DIR)/commands/ServerCommands.cpp \
+	$(SRC_DIR)/commands/CommandHandler.cpp \
+	$(SRC_DIR)/commands/ChannelCommands.cpp \
+	$(SRC_DIR)/commands/MessagingCommands.cpp \
+	$(SRC_DIR)/command_utils/ReplyBuilder.cpp \
+	$(SRC_DIR)/command_utils/CommandParser.cpp
 
-SRC += $(SRC_DIR)/main.cpp \
+OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+DEP = $(OBJ:.o=.d)
 
-SRC += $(SRC_DIR)/User.cpp \
-		$(SRC_DIR)/Server.cpp \
-		$(SRC_DIR)/Channel.cpp \
-		$(SRC_DIR)/ServerUtils.cpp \
-		$(SRC_DIR)/PollManager.cpp  \
+BOT_SRC = \
+	bonus/main.cpp \
+	bonus/WeatherBot.cpp
 
-		
-SRC += $(SRC_DIR)/commands/AuthCommands.cpp \
-		$(SRC_DIR)/commands/ServerCommands.cpp \
-		$(SRC_DIR)/commands/CommandHandler.cpp \
-		$(SRC_DIR)/commands/ChannelCommands.cpp \
-		$(SRC_DIR)/commands/MessagingCommands.cpp \
+BOT_OBJ = $(BOT_SRC:bonus/%.cpp=$(BOT_OBJ_DIR)/%.o)
+BOT_DEP = $(BOT_OBJ:.o=.d)
 
-SRC += $(SRC_DIR)/command_utils/ReplyBuilder.cpp \
-		$(SRC_DIR)/command_utils/CommandParser.cpp \
-
-# **************************************************************************** #
-#                                	 bonus                                     #
-# **************************************************************************** #	
-
-SRCS_BONUS += $(SRC_BONUS_DIR)/main.cpp \
-
-SRCS_BONUS += $(SRC_BONUS_DIR)/User.cpp \
-			$(SRC_BONUS_DIR)/Server.cpp \
-			$(SRC_BONUS_DIR)/Channel.cpp \
-			$(SRC_BONUS_DIR)/ServerUtils.cpp \
-			$(SRC_BONUS_DIR)/PollManager.cpp  \
-			$(SRC_BONUS_DIR)/Bot.cpp  \
-
-		
-SRCS_BONUS += $(SRC_BONUS_DIR)/commands/AuthCommands.cpp \
-			$(SRC_BONUS_DIR)/commands/ServerCommands.cpp \
-			$(SRC_BONUS_DIR)/commands/CommandHandler.cpp \
-			$(SRC_BONUS_DIR)/commands/ChannelCommands.cpp \
-			$(SRC_BONUS_DIR)/commands/MessagingCommands.cpp \
-
-SRCS_BONUS += $(SRC_BONUS_DIR)/command_utils/ReplyBuilder.cpp \
-			$(SRC_BONUS_DIR)/command_utils/CommandParser.cpp \
-
-OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
-OBJ_BONUS = $(patsubst $(SRC_BONUS_DIR)/%.cpp, $(OBJ_BONUS_DIR)/%.o, $(SRCS_BONUS))
-
-all: $(NAME)
+# ============================================================================ #
+#                                BUILD RULES								   #
+# ============================================================================ #
+all: $(BIN_DIR) $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $(NAME) 
+	$(CC) $(CFLAGS) $(OBJ) -o $@
 
-bonus: $(NAME_BONUS)
-
-$(NAME_BONUS): $(OBJ_BONUS)
-	$(CC) $(CFLAGS_BONUS) $(OBJ_BONUS) -o $(NAME_BONUS) 
-	
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) -c $< -o $@
 
-$(OBJ_BONUS_DIR)/%.o: $(SRC_BONUS_DIR)/%.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS_BONUS) -c $< -o $@
-
-#$(OBJ_DIR):
-#	mkdir -p $(OBJ_DIR)
-
+# Bonus target
 bot: $(BOT_BIN)
 
-$(BOT_BIN): $(BOT_SRC)
-	$(CC) $(CFLAGS) -o $(BOT_BIN) $(BOT_SRC)
+$(BOT_BIN): $(BOT_OBJ) | $(BIN_DIR)
+	$(CC) $(CFLAGS) $(BOT_OBJ) -o $@
 
+$(BOT_OBJ_DIR)/%.o: bonus/%.cpp
+	mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) -c $< -o $@
+
+# Debug build
+debug: CFLAGS += -g -DDEBUG
+debug: re
+
+# ============================================================================ #
+#                               CLEANING RULES								   #
+# ============================================================================ #
 clean:
-	rm -rf $(OBJ_DIR) $(OBJ_BONUS_DIR)
+	rm -rf $(OBJ_DIR) $(BOT_OBJ_DIR)
 
 fclean: clean
-	rm -f $(NAME) $(NAME_BONUS)
-	rm -f $(BOT_BIN)
+	rm -f $(NAME) $(NAME_BONUS) $(BOT_BIN)
 
 re: fclean all
 
-rebonus: fclean bonus
+# ============================================================================ #
+#                        INCLUDE AUTO-GENERATED DEPS						   #
+# ============================================================================ #
+-include $(DEP)
+-include $(BOT_DEP)
 
-.PHONY: all bonus clean fclean re rebonus
+# ============================================================================ #
+#                                PHONY TARGETS								   #
+# ============================================================================ #
+.PHONY: all clean fclean re debug bot

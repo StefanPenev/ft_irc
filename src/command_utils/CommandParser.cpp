@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 16:12:02 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/25 15:54:47 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/14 23:57:44 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 #include <cctype>
 #include <sstream>
 
+/**
+ * Trims leading and trailing whitespace from the input string.
+ * Returns a new string with whitespace removed from both ends.
+ */
 std::string CommandParser::trim(const std::string& str) {
     size_t start = 0;
     while (start < str.size() && std::isspace(str[start]))
@@ -26,6 +30,11 @@ std::string CommandParser::trim(const std::string& str) {
     return str.substr(start, end - start);
 }
 
+/**
+ * Parses a raw IRC line into a command and its arguments.
+ * Supports parsing of trailing arguments prefixed with ':'.
+ * Returns true if parsing is successful, otherwise false.
+ */
 bool CommandParser::parse(const std::string& line, std::string& command, std::vector<std::string>& args) {
     command.clear();
     args.clear();

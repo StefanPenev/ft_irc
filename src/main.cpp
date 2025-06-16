@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anilchen <anilchen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 11:54:43 by anilchen          #+#    #+#             */
-/*   Updated: 2025/06/02 13:43:56 by anilchen         ###   ########.fr       */
+/*   Updated: 2025/06/14 23:55:27 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-
-// hexchat
 
 bool Server::running = true;
 

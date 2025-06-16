@@ -6,7 +6,7 @@
 /*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 15:40:55 by stefan            #+#    #+#             */
-/*   Updated: 2025/05/30 23:16:10 by stefan           ###   ########.fr       */
+/*   Updated: 2025/06/14 23:59:11 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,10 @@ void CommandHandler::handleUser(int fd, const std::vector<std::string>& args) {
 }
 
 // Utility functions
+/**
+ * Checks whether the given nickname is valid according to IRC rules.
+ * Returns true if the nickname is valid, false otherwise.
+ */
 bool CommandHandler::isValidNickname(const std::string& nick) const {
     if (nick.empty())
         return false;
@@ -126,6 +130,11 @@ bool CommandHandler::isValidNickname(const std::string& nick) const {
     return true;
 }
 
+/**
+ * Attempts to complete user registration.
+ * If the user has sent the correct password, and both nickname and username are set,
+ * the user is marked as REGISTERED and a welcome message is added to their send buffer.
+ */
 void CommandHandler::tryRegisterUser(User* user) {
     if (user->getState() == User::REGISTERED)
         return;
